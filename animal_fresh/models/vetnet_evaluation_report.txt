@@ -1,0 +1,16 @@
+Test Accuracy: 96.97%
+
+                  precision    recall  f1-score   support
+
+       Bacterial       1.00      1.00      1.00       367
+  Cardiovascular       0.94      0.83      0.88       357
+Gastrointestinal       1.00      1.00      1.00       377
+       Metabolic       1.00      1.00      1.00       375
+ Musculoskeletal       0.96      0.97      0.96       383
+       Parasitic       1.00      1.00      1.00       390
+     Respiratory       0.87      0.98      0.92       374
+           Viral       0.99      0.98      0.99       377
+
+        accuracy                           0.97      3000
+       macro avg       0.97      0.97      0.97      3000
+    weighted avg       0.97      0.97      0.97      3000

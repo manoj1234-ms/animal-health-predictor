@@ -1,0 +1,161 @@
+[
+    {
+        "id": "VET-001",
+        "name": "Central Animal Hospital",
+        "country": "USA",
+        "state": "California",
+        "city": "Los Angeles",
+        "specialties": [
+            "General Surgery",
+            "Internal Medicine",
+            "Vaccinations"
+        ],
+        "doctors": [
+            "Dr. Sarah Smith",
+            "Dr. John Doe"
+        ],
+        "lat": 34.0522,
+        "lon": -118.2437,
+        "rating": 4.8,
+        "contact": "555-0101",
+        "emergency": true
+    },
+    {
+        "id": "VET-002",
+        "name": "Paws & Hearts Cardiology",
+        "country": "USA",
+        "state": "New York",
+        "city": "New York City",
+        "specialties": [
+            "Cardiology",
+            "Imaging",
+            "Heart Surgery"
+        ],
+        "doctors": [
+            "Dr. Emily Heart"
+        ],
+        "lat": 40.7128,
+        "lon": -74.006,
+        "rating": 4.9,
+        "contact": "555-0102",
+        "emergency": false
+    },
+    {
+        "id": "VET-003",
+        "name": "VetDerm Specialty Center",
+        "country": "USA",
+        "state": "California",
+        "city": "San Francisco",
+        "specialties": [
+            "Dermatology",
+            "Allergy Testing",
+            "Skin Surgery"
+        ],
+        "doctors": [
+            "Dr. Mark Skin"
+        ],
+        "lat": 37.7749,
+        "lon": -122.4194,
+        "rating": 4.7,
+        "contact": "555-0103",
+        "emergency": false
+    },
+    {
+        "id": "VET-004",
+        "name": "City Emergency Vet",
+        "country": "USA",
+        "state": "Illinois",
+        "city": "Chicago",
+        "specialties": [
+            "Emergency Medicine",
+            "Trauma",
+            "ICU"
+        ],
+        "doctors": [
+            "Dr. Alex Urgent",
+            "Dr. Jane Fast"
+        ],
+        "lat": 41.8781,
+        "lon": -87.6298,
+        "rating": 4.5,
+        "contact": "555-9111",
+        "emergency": true
+    },
+    {
+        "id": "VET-005",
+        "name": "Avian & Exotic Care",
+        "country": "USA",
+        "state": "Texas",
+        "city": "Austin",
+        "specialties": [
+            "Exotics",
+            "Avian Medicine",
+            "Reptiles"
+        ],
+        "doctors": [
+            "Dr. Birdman"
+        ],
+        "lat": 30.2672,
+        "lon": -97.7431,
+        "rating": 4.8,
+        "contact": "555-0105",
+        "emergency": false
+    },
+    {
+        "id": "VET-006",
+        "name": "Royal Vet London",
+        "country": "United Kingdom",
+        "state": "Greater London",
+        "city": "London",
+        "specialties": [
+            "Internal Medicine",
+            "Surgery"
+        ],
+        "doctors": [
+            "Dr. Winston Bourne"
+        ],
+        "lat": 51.5074,
+        "lon": -0.1278,
+        "rating": 4.9,
+        "contact": "+44 20 7946 0000",
+        "emergency": true
+    },
+    {
+        "id": "VET-007",
+        "name": "Mumbai Pet Specialist",
+        "country": "India",
+        "state": "Maharashtra",
+        "city": "Mumbai",
+        "specialties": [
+            "Cardiology",
+            "Emergency Medicine"
+        ],
+        "doctors": [
+            "Dr. Amit Kumar"
+        ],
+        "lat": 19.076,
+        "lon": 72.8777,
+        "rating": 4.7,
+        "contact": "+91 22 1234 5678",
+        "emergency": true
+    },
+    {
+        "id": "VET-008",
+        "name": "Tokyo Tech Vets",
+        "country": "Japan",
+        "state": "Tokyo",
+        "city": "Shibuya",
+        "specialties": [
+            "Imaging",
+            "Dermatology"
+        ],
+        "doctors": [
+            "Dr. Kenzo Sato"
+        ],
+        "lat": 35.6762,
+        "lon": 139.6503,
+        "rating": 4.8,
+        "contact": "+81 3 1234 5678",
+        "emergency": false
+    }
+]

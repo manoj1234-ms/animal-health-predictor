@@ -1,0 +1,126 @@
+{
+    "Canine Parvovirus": {
+        "treatment_plan": "Immediate hospitalization required. IV fluid therapy for dehydration is critical.",
+        "medications": [
+            "Maropitant (antiemetic)",
+            "Broad-spectrum antibiotics (to prevent secondary infection)",
+            "Pain management"
+        ],
+        "follow_up": "Check white blood cell count daily. Isolate from other dogs for 2 weeks.",
+        "prognosis": "Good with early aggressive treatment (80-90% survival)."
+    },
+    "Feline Panleukopenia": {
+        "treatment_plan": "Intensive supportive care. Isolation is mandatory.",
+        "medications": [
+            "IV Fluids (Lactated Ringer's)",
+            "Ampicillin or Cefazolin",
+            "Anti-nausea medication"
+        ],
+        "follow_up": "Monitor electrolytes and glucose. Force feeding if anorexic.",
+        "prognosis": "Guarded to Poor depending on severity."
+    },
+    "Rabies": {
+        "treatment_plan": "No cure. Euthanasia is recommended for confirmed cases due to zoonotic risk.",
+        "medications": [
+            "None"
+        ],
+        "follow_up": "Report to local health authorities immediately.",
+        "prognosis": "Fatal."
+    },
+    "Leptospirosis": {
+        "treatment_plan": "Antibiotic therapy and supportive care for kidney/liver function.",
+        "medications": [
+            "Doxycycline (drug of choice)",
+            "Penicillin G (for severe cases)"
+        ],
+        "follow_up": "Monitor renal values (BUN/Creatinine) weekly.",
+        "prognosis": "Good if treated early; can lead to chronic kidney failure."
+    },
+    "Salmonellosis": {
+        "treatment_plan": "Fluid therapy and antimicrobials if systemic.",
+        "medications": [
+            "Enrofloxacin",
+            "Amoxicillin-clavulanate"
+        ],
+        "follow_up": "Recheck fecal culture after treatment.",
+        "prognosis": "Variable."
+    },
+    "Heartworm": {
+        "treatment_plan": "Multi-stage protocol (Immiticide). Strict exercise restriction.",
+        "medications": [
+            "Melarsomine",
+            "Doxycycline",
+            "Prednisone",
+            "Macrocyclic lactone preventive"
+        ],
+        "follow_up": "Antigen test 6 months post-treatment.",
+        "prognosis": "Good for Class 1-2; Guarded for Class 3-4."
+    },
+    "Giardia": {
+        "treatment_plan": "Antiparasitic medication and environmental decontamination.",
+        "medications": [
+            "Fenbendazole",
+            "Metronidazole"
+        ],
+        "follow_up": "Retest fecal sample in 2-4 weeks.",
+        "prognosis": "Excellent."
+    },
+    "Diabetes Mellitus": {
+        "treatment_plan": "Insulin therapy and dietary management.",
+        "medications": [
+            "Insulin (NPH or Glargine)",
+            "High-fiber diet (dogs)",
+            "Low-carb diet (cats)"
+        ],
+        "follow_up": "Blood glucose curve every 1-2 weeks initially.",
+        "prognosis": "Good with consistent management."
+    },
+    "Milk Fever": {
+        "treatment_plan": "Immediate calcium supplementation.",
+        "medications": [
+            "Calcium gluconate (IV slow)",
+            "Oral calcium gel"
+        ],
+        "follow_up": "Monitor for relapse within 24 hours.",
+        "prognosis": "Excellent if treated immediately."
+    },
+    "Hip Dysplasia": {
+        "treatment_plan": "Weight management, physical therapy, and pain control.",
+        "medications": [
+            "NSAIDs (Carprofen/Meloxicam)",
+            "Glucosamine/Chondroitin",
+            "Gabapentin"
+        ],
+        "follow_up": "Radiographs annually to monitor arthritis.",
+        "prognosis": "Managed chronically."
+    },
+    "Laminitis": {
+        "treatment_plan": "Emergency. Cryotherapy (ice boots), stall rest, foot support.",
+        "medications": [
+            "Phenylbutazone (Bute)",
+            "Acepromazine (vasodilator)"
+        ],
+        "follow_up": "Radiographs to check for coffin bone rotation.",
+        "prognosis": "Guarded."
+    },
+    "Pneumonia": {
+        "treatment_plan": "Oxygen therapy, nebulization, and antibiotics.",
+        "medications": [
+            "Doxycycline",
+            "Azithromycin",
+            "Bronchodilators"
+        ],
+        "follow_up": "Chest X-rays every 2 weeks.",
+        "prognosis": "Fair to Good."
+    },
+    "Colic": {
+        "treatment_plan": "Pain management, hydration, walking. Surgery for displacement/torsion.",
+        "medications": [
+            "Flunixin meglumine (Banamine)",
+            "Xylazine",
+            "Mineral oil (via nasogastric tube)"
+        ],
+        "follow_up": "Monitor manure production.",
+        "prognosis": "Variable depending on cause."
+    }
+}

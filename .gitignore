@@ -13,11 +13,9 @@
 !/animal_fresh/**
 
 # Specific ignores within animal_fresh
-animal_fresh/__pycache__/
-animal_fresh/*.pyc
-animal_fresh/.venv/
-animal_fresh/animal_venv/
+animal_fresh/logs/
 animal_fresh/*.log
+animal_fresh/__pycache__/
 
 # IDE and OS junk
 .vscode/
