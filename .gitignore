@@ -1,0 +1,26 @@
+# Veterinary AI Suite - Git Management
+# Focus only on the 'animal_fresh' application
+
+# Ignore everything in the root
+/*
+
+# Except the app and git configuration
+!/animal_fresh/
+!/.gitignore
+!/README.md
+
+# Recursive allow for animal_fresh contents
+!/animal_fresh/**
+
+# Specific ignores within animal_fresh
+animal_fresh/__pycache__/
+animal_fresh/*.pyc
+animal_fresh/.venv/
+animal_fresh/animal_venv/
+animal_fresh/*.log
+
+# IDE and OS junk
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
