@@ -111,8 +111,8 @@ if submitted:
         # Save to session state for the Chat system
         st.session_state.last_diagnosis = {
             "animal": animal_type,
-            "disease": result.get('disease'),
-            "category": result.get('category'),
+            "disease": result.get('predicted_disease'),
+            "category": result.get('predicted_category'),
             "treatment": result.get('treatment')
         }
         
@@ -120,10 +120,10 @@ if submitted:
         res_col1, res_col2 = st.columns([1, 2])
         
         with res_col1:
-            st.success(f"## {result.get('disease', 'Unknown')}")
-            conf = result.get('confidence', 0) * 100
+            st.success(f"## {result.get('predicted_disease', 'Unknown')}")
+            conf = result.get('disease_confidence', 0) * 100
             st.metric("AI Confidence", f"{conf:.1f}%")
-            st.info(f"Category: **{result.get('category', 'General')}**")
+            st.info(f"Category: **{result.get('predicted_category', 'General')}**")
             
             # --- Chat Shortcut ---
             if st.button("💬 Open AI Specialist Chat", use_container_width=True):
@@ -149,7 +149,7 @@ if submitted:
         st.subheader("📍 AI-Recommended Specialist Referral")
         from src.specialist_network import get_specialists_for_disease
         
-        category = result.get('category', 'General')
+        category = result.get('predicted_category', 'General')
         specialists = get_specialists_for_disease(category)
         
         if specialists:
