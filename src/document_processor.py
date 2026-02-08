@@ -48,7 +48,8 @@ def parse_animal_report(text):
     for key, pattern in patterns.items():
         match = re.search(pattern, text)
         if match:
-            val = match.group(2)
+            # Get the last captured group (the actual value)
+            val = match.groups()[-1]
             if key == 'Animal':
                 data[key] = val.capitalize()
             else:
