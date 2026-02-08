@@ -1,6 +1,6 @@
 # Veterinary AI Suite - Optimized Docker Deployment
-# Using Python 3.10 slim for broad compatibility
-FROM python:3.10-slim
+# Using Python 3.13 slim for the latest performance and feature updates
+FROM python:3.13-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
