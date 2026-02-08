@@ -16,8 +16,8 @@ if 'selection' not in st.session_state:
     st.session_state.selection = "Patient Intake"
 
 selection = st.sidebar.radio("Go to:", 
-    ["Patient Intake", "Find Care", "Specialist Chat", "Admin Dashboard", "Analytics Hub", "Species Analytics", "Executive View"],
-    index=["Patient Intake", "Find Care", "Specialist Chat", "Admin Dashboard", "Analytics Hub", "Species Analytics", "Executive View"].index(st.session_state.selection),
+    ["Patient Intake", "Find Care", "Specialist Chat", "Data Management", "Admin Dashboard", "Analytics Hub", "Species Analytics", "Executive View"],
+    index=["Patient Intake", "Find Care", "Specialist Chat", "Data Management", "Admin Dashboard", "Analytics Hub", "Species Analytics", "Executive View"].index(st.session_state.selection),
     key="nav_radio"
 )
 
@@ -48,6 +48,9 @@ elif selection == "Find Care":
 
 elif selection == "Specialist Chat":
     run_module(os.path.join(base_dir, "dashboard_chat.py"))
+
+elif selection == "Data Management":
+    run_module(os.path.join(base_dir, "dashboard_management.py"))
 
 elif selection == "Admin Dashboard":
     run_module(os.path.join(base_dir, "dashboard_admin.py"))

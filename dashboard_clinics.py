@@ -5,37 +5,50 @@ AI-powered referral system to find the best care for diagnosed conditions.
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from src.specialist_network import CLINIC_DB, DISEASE_TO_SPECIALTY, get_specialists_for_disease
+from src.location_service import get_real_specialists, GOOGLE_API_KEY
+from src.specialist_network import DISEASE_TO_SPECIALTY, get_specialists_for_disease
 import os
 
 # st.set_page_config is already handled by app_dashboard.py
 
 st.title("📍 AI Clinic & Specialist Network")
-st.markdown("Find the best-rated veterinary specialists based on AI diagnosis results.")
+st.markdown("Find the best-rated veterinary specialists based on real-time location and AI diagnosis.")
+
+# --- API Configuration ---
+with st.expander("⚙️ Network Settings & API Configuration"):
+    api_key = st.text_input("Google Maps API Key", value=GOOGLE_API_KEY, type="password", help="Enter your key to enable real-time local search.")
+    if api_key:
+        os.environ["GOOGLE_MAPS_API_KEY"] = api_key
+        st.success("API Key updated for this session!")
+
+# --- Fetch Data ---
+# Use current location (defaults to a central point if not detected)
+lat, lon = 34.0522, -118.2437 # Default: Los Angeles
+CLINICS = get_real_specialists(lat, lon)
 
 # --- Filters ---
 col_f1, col_f2 = st.columns([1, 2])
 
 with col_f1:
     st.subheader("Search Filters")
-    countries = sorted(list(set([c.get("country", "USA") for c in CLINIC_DB])))
+    countries = sorted(list(set([c.get("country", "USA") for c in CLINICS])))
     selected_country = st.selectbox("Select Country", ["All"] + countries)
     
     # Filter states based on country
     if selected_country != "All":
-        states = sorted(list(set([c.get("state") for c in CLINIC_DB if c.get("country") == selected_country and c.get("state") is not None])))
+        states = sorted(list(set([c.get("state") for c in CLINICS if c.get("country") == selected_country and c.get("state") is not None])))
         selected_state = st.selectbox("Select State/Province", ["All"] + states)
     else:
         selected_state = "All"
         
     # Filter cities based on state
     if selected_state != "All":
-        cities = sorted(list(set([c.get("city") for c in CLINIC_DB if c.get("state") == selected_state and c.get("city") is not None])))
+        cities = sorted(list(set([c.get("city") for c in CLINICS if c.get("state") == selected_state and c.get("city") is not None])))
         selected_city = st.selectbox("Select City", ["All"] + cities)
     else:
         selected_city = "All"
     
-    all_specialties = sorted(list(set([s for c in CLINIC_DB for s in c["specialties"]])))
+    all_specialties = sorted(list(set([s for c in CLINICS for s in c["specialties"]])))
     selected_spec = st.multiselect("Filter by Specialty", all_specialties)
     
     show_emergency = st.toggle("Only Show Emergency Clinics")
@@ -49,7 +62,7 @@ ai_category = st.selectbox("Simulate AI Diagnosis Category", ["-"] + list(DISEAS
 st.subheader("Clinic Locator")
 
 # Convert DB to DataFrame for mapping
-df_clinics = pd.DataFrame(CLINIC_DB)
+df_clinics = pd.DataFrame(CLINICS)
 if 'country' not in df_clinics.columns:
     df_clinics['country'] = 'USA'
 
