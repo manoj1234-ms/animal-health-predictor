@@ -37,9 +37,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: actions/setup-docker-action@v1
-        with:
-          daemon_off: false
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
         if: env.DOCKER_USERNAME != ''
@@ -55,4 +53,4 @@ jobs:
         with:
           context: .
           push: ${{ secrets.DOCKER_USERNAME != '' }}
-          tags: ${{ secrets.DOCKER_USERNAME }}/vetnet-ai-suite:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/animal-diseases-system:latest
