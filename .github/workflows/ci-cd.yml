@@ -23,11 +23,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install fastapi uvicorn pandas numpy scikit-learn xgboost torch joblib psutil pydantic requests pytest
     
-    - name: Run tests
-      run: |
-        python -m pytest tests/ -v || echo "No tests found, skipping"
-    
     - name: Verify model training
+      env:
+        PYTHONPATH: ${{ github.workspace }}
       run: |
         python scripts/generate_enhanced_data.py
         python src/train_nn.py

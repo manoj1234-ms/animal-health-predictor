@@ -2,6 +2,10 @@
 Retrain Models with Comprehensive Dataset
 Trains models on 8 species, 8 categories, 193 diseases
 """
+import sys
+import os
+# Add project root to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pandas as pd
 import numpy as np

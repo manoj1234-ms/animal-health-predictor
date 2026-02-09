@@ -2,6 +2,11 @@
 Train Neural Network Model (VetNet - PyTorch Version)
 Uses Enhanced Dataset and PyTorch
 """
+import sys
+import os
+# Add project root to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import pandas as pd
 import numpy as np
 import torch
@@ -11,7 +16,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from src.models.neural_network import VetNet
 import joblib
-import os
 
 print(f"CUDA Available: {torch.cuda.is_available()}")
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
