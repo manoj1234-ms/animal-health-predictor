@@ -9,16 +9,39 @@ from typing import Optional
 import sys
 import os
 import time
+import traceback
 from datetime import datetime
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from src.inference_nn import predict_disease_nn
+try:
+    from src.inference_nn import predict_disease_nn
+except ImportError as e:
+    print(f"⚠️ ML Model Import Error: {e}")
+    print("Running in Lightweight Mode (No Neural Network)")
+    def predict_disease_nn(data):
+        return {"success": False, "error": "ML Model not loaded"}
+
 from src.monitoring import SystemMonitor, start_background_monitoring
 
 app = FastAPI(title="Animal Disease Prediction API (VetNet Powered)")
+
+# Enable CORS for React Frontend
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Allow all for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 monitor = SystemMonitor()
+
+# Import and attach IoT Gateway
+from src.iot_gateway import router as iot_router
+app.include_router(iot_router, prefix="/iot", tags=["IoT Telemetry"])
 
 class PredictionRequest(BaseModel):
     Animal: str
@@ -85,6 +108,7 @@ def predict(request: PredictionRequest):
         
         return result
     except Exception as e:
+        traceback.print_exc()
         latency_ms = (time.time() - start_time) * 1000
         # Log error
         monitor.log_prediction(request.dict(), {"success": False, "error": str(e)}, latency_ms)
@@ -93,5 +117,5 @@ def predict(request: PredictionRequest):
 if __name__ == "__main__":
     import uvicorn
     # Start server
-    print("Starting API server on port 8000...")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    print("Starting API server on port 8002...")
+    uvicorn.run(app, host="0.0.0.0", port=8002)

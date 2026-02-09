@@ -1,38 +1,39 @@
-# Veterinary AI Suite - Optimized Docker Deployment
-# Using Python 3.13 slim for the latest performance and feature updates
-FROM python:3.13-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV STREAMLIT_SERVER_PORT=8501
-ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
+# ---------------------------------------------------
+# VetNet AI Backend Dockerfile
+# ---------------------------------------------------
+FROM python:3.10-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies for PyTorch, psutil, and other ML libs
+# Install system dependencies for ML libraries
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
-    git \
+    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install dependencies
-COPY requirements.txt .
+# Copy requirements if they exist, or install common ones
+# Since we don't have a requirements.txt yet, let's create a minimal environment
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn \
+    pandas \
+    numpy \
+    scikit-learn \
+    xgboost \
+    torch \
+    joblib \
+    psutil \
+    pydantic \
+    requests
 
-# Install CPU version of torch to keep image size manageable
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
-    pip install --no-cache-dir -r requirements.txt
-
-# Copy the entire application
+# Copy project files
 COPY . .
 
-# Expose ports for FastAPI (8000) and Streamlit (8501)
-EXPOSE 8000
-EXPOSE 8501
+# Set PYTHONPATH to include src
+ENV PYTHONPATH=/app
 
-# Run the system using the Python orchestrator
-# This handles both services and signals correctly within the container
-CMD ["python", "run_system.py", "--docker"]
+# Expose port and start API
+EXPOSE 8002
+CMD ["python", "simple_api.py"]

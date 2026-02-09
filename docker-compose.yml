@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  vetnet-brain:
+    build: .
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+    environment:
+      - PYTHONIOENCODING=utf-8
+    networks:
+      - vetnet-network
+
+  vetnet-sim:
+    build: .
+    command: python scripts/simulate_iot_devices.py
+    depends_on:
+      - vetnet-brain
+    environment:
+      - API_URL=http://vetnet-brain:8002/iot/telemetry
+    networks:
+      - vetnet-network
+
+networks:
+  vetnet-network:
+    driver: bridge

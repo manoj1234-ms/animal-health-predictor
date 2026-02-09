@@ -1,28 +1,25 @@
-# Veterinary AI Suite - Git Management
-# Focused solely on the application folder
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
 env/
 venv/
-.venv/
-animal_env/
+.env
 
-# Data & Logs (Keeping models and essential data)
-logs/
-*.log
+# Data & Models (Preserve Folder structure but ignore large files)
+data/*.csv
+models/*.pth
+models/*.pkl
+logs/*.jsonl
+api_log.txt
+api_error.txt
 
-# IDE / OS
-.vscode/
-.idea/
+# OS
 .DS_Store
 Thumbs.db
-*.swp
-*.swo
 
-# Docker
-.dockerignore
+# Frontend
+vetnet-ui/node_modules/
+vetnet-ui/dist/
+vetnet-ui/.env

@@ -81,10 +81,15 @@ def train_vetnet():
         numeric_data, species_encoded, y_encoded, test_size=0.2, stratify=y_encoded, random_state=42
     )
     
-    # 4. Scaling
+    # 4. Imputation and Scaling
+    from sklearn.impute import SimpleImputer
+    imputer = SimpleImputer(strategy='mean')
+    X_num_train_imputed = imputer.fit_transform(X_num_train)
+    X_num_test_imputed = imputer.transform(X_num_test)
+    
     scaler = StandardScaler()
-    X_num_train_scaled = scaler.fit_transform(X_num_train)
-    X_num_test_scaled = scaler.transform(X_num_test)
+    X_num_train_scaled = scaler.fit_transform(X_num_train_imputed)
+    X_num_test_scaled = scaler.transform(X_num_test_imputed)
     
     # 5. DataLoaders
     train_dataset = VetDataset(X_num_train_scaled, X_cat_train, y_train)
@@ -164,6 +169,7 @@ def train_vetnet():
         'scaler': scaler,
         'species_encoder': species_encoder,
         'category_encoder': category_encoder,
+        'imputer': imputer,
         'n_categories': num_categories,
         'n_species': num_species,
         'numeric_dim': num_features,
@@ -174,6 +180,7 @@ def train_vetnet():
     
     # Also save separate sklearn objects for compatibility with other scripts if needed
     joblib.dump(scaler, 'models/vetnet_scaler.pkl')
+    joblib.dump(imputer, 'models/vetnet_imputer.pkl')
     joblib.dump(species_encoder, 'models/species_encoder.pkl')
     joblib.dump(category_encoder, 'models/category_encoder.pkl')
     

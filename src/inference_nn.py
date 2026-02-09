@@ -18,6 +18,7 @@ MODEL_PATH = 'models/vetnet_best_state.pth'
 try:
     print("Loading VetNet Neural Network...")
     scaler = joblib.load('models/vetnet_scaler.pkl')
+    imputer = joblib.load('models/vetnet_imputer.pkl')
     species_encoder = joblib.load('models/species_encoder.pkl')
     category_encoder = joblib.load('models/category_encoder.pkl')
     
@@ -93,21 +94,32 @@ def predict_disease_nn(input_dict):
         # Let's check `models/vetnet_checkpoint.pth` for column names if possible.
         # Or hardcode standard symptom list.
         symptom_list = ['Symptom_Fever', 'Symptom_Lethargy', 'Symptom_Vomiting', 'Symptom_Diarrhea', 
-                        'Symptom_WeightLoss', 'Symptom_SkinLesion', 'Symptom_Coughing', 'Symptom_Lameness']
+                        'Symptom_WeightLoss', 'Symptom_SkinLesion', 'Symptom_Coughing', 'Symptom_Lameness',
+                        'Symptom_NasalDischarge', 'Symptom_EyeDischarge', 'Symptom_Drooling', 'Symptom_Blisters']
         
         numeric_vals = base_numeric + ratios + [float(input_dict.get(s, 0)) for s in symptom_list]
         
-        # 2. Preprocessing
+        # 2. Imputation and Preprocessing
         X_num = np.array([numeric_vals], dtype=np.float32)
-        X_num_scaled = scaler.transform(X_num)
+        X_num_imputed = imputer.transform(X_num)
+        X_num_scaled = scaler.transform(X_num_imputed)
         
+        # 0. Ensure all required columns exist in input_dict for XGBoost stage
+        required_categorical = ['Animal', 'Gender', 'Breed']
+        for col in required_categorical:
+            if col not in input_dict:
+                input_dict[col] = "Mixed" if col == 'Breed' else ("Male" if col == 'Gender' else "Dog")
+        
+        # Ensure age is present
+        if 'Age' not in input_dict:
+            input_dict['Age'] = 5.0
+
         animal = input_dict.get('Animal', 'Dog')
         try:
             X_cat = species_encoder.transform([animal])
         except:
             # Handle unknown species
-            # print(f"Warning: Unknown species {animal}")
-            X_cat = np.array([0]) # Default to first class or handle better
+            X_cat = np.array([0]) 
             
         # 3. VetNet Prediction (Stage 1)
         with torch.no_grad():
@@ -123,12 +135,17 @@ def predict_disease_nn(input_dict):
         # 4. XGBoost Prediction (Stage 2)
         # We use the predicted category to select the specialized model
         if category_pred in stage2_models:
-            stage2_dict = prepare_stage2_input(input_dict) # Helper needed or reuse Logic
-            # Actually stage 2 pipeline expects a DataFrame
-            input_df = pd.DataFrame([input_dict])
+            # Create a clean DataFrame with ALL expected columns for the pipeline
+            # The pipeline uses categorical and numeric features defined in retrain_models
+            full_input = input_dict.copy()
             
-            # The stage 2 models behave differently, they use their own preprocessors.
-            # We just need to pass the raw dataframe.
+            # Ensure all symptoms are in the dict for the DataFrame
+            for s in symptom_list:
+                if s not in full_input:
+                    full_input[s] = 0.0
+            
+            input_df = pd.DataFrame([full_input])
+            
             stage2_pipeline = stage2_models[category_pred]
             
             # Note: Stage 2 models were trained on the OLD data structure (without ratios?).
@@ -175,6 +192,7 @@ def predict_disease_nn(input_dict):
             'predicted_disease': disease_name,
             'category_confidence': round(cat_conf, 3),
             'disease_confidence': round(disease_conf, 3),
+            'confidence': round(disease_conf, 3), # Matching frontend expected key
             'method': "VetNet (Deep Learning)",
             'biological_validation': validation,
             'treatment': treatment_info,

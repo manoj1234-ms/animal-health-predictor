@@ -75,7 +75,7 @@ def run_system(backend_only=False, frontend_only=False, is_docker=False):
             frontend_cmd = [
                 sys.executable, "-m", "streamlit", "run", 
                 "--server.port=8501", 
-                "--server.address=0.0.0.0" if is_docker else "localhost",
+                f"--server.address={'0.0.0.0' if is_docker else 'localhost'}",
                 "--browser.gatherUsageStats=false",
                 target_dashboard
             ]
