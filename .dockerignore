@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+
+# Data & Models (too large for container)
+data/*.csv
+models/*.pth
+models/*.pkl
+logs/*.jsonl
+api_log.txt
+api_error.txt
+
+# Git
+.git/
+.github/
+.gitignore
+
+# Frontend
+vetnet-ui/node_modules/
+vetnet-ui/dist/
+vetnet-ui/.vite/
+
+# Documentation
+*.md
+!README.md
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Hardware
+hardware/

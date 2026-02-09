@@ -6,15 +6,12 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system dependencies for ML libraries
-RUN apt-get update && apt-get install -y \
-    build-essential \
+# Install system dependencies (minimal)
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements if they exist, or install common ones
-# Since we don't have a requirements.txt yet, let's create a minimal environment
+# Install Python dependencies
 RUN pip install --no-cache-dir \
     fastapi \
     uvicorn \
@@ -22,7 +19,7 @@ RUN pip install --no-cache-dir \
     numpy \
     scikit-learn \
     xgboost \
-    torch \
+    torch --index-url https://download.pytorch.org/whl/cpu \
     joblib \
     psutil \
     pydantic \
