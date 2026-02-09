@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Install Python dependencies (excluding PyTorch)
 RUN pip install --no-cache-dir \
     fastapi \
     uvicorn \
@@ -19,11 +19,13 @@ RUN pip install --no-cache-dir \
     numpy \
     scikit-learn \
     xgboost \
-    torch --index-url https://download.pytorch.org/whl/cpu \
     joblib \
     psutil \
     pydantic \
     requests
+
+# Install PyTorch CPU-only version separately
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 
 # Copy project files
 COPY . .
