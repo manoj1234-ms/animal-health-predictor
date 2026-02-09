@@ -32,7 +32,6 @@ jobs:
         cache-to: type=gha,mode=max
     
     - name: Push to Docker Hub (if secrets configured)
-      if: ${{ secrets.DOCKER_USERNAME != '' }}
       uses: docker/build-push-action@v4
       with:
         context: .

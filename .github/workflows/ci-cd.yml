@@ -3,8 +3,11 @@ name: VetNet AI CI/CD Pipeline
 on:
   push:
     branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+    paths:
+      - 'scripts/generate_enhanced_data.py'
+      - 'src/train_nn.py'
+      - 'scripts/retrain_models.py'
+  workflow_dispatch:  # Allow manual trigger
 
 jobs:
   build-and-push-docker:
