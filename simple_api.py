@@ -4,6 +4,7 @@ Updated to use Neural Network (VetNet) and Real-Time Monitoring.
 """
 
 from fastapi import FastAPI, HTTPException
+from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from typing import Optional
 import sys
@@ -32,18 +33,6 @@ except ImportError:
 
 
 from src.monitoring import SystemMonitor, start_background_monitoring
-
-app = FastAPI(title="Animal Disease Prediction API (VetNet Powered)")
-
-# Enable CORS for React Frontend
-from fastapi.middleware.cors import CORSMiddleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], # Allow all for development
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 monitor = SystemMonitor()
 
@@ -77,18 +66,30 @@ class PredictionRequest(BaseModel):
     Symptom_Coughing: Optional[int] = 0
     Symptom_Lameness: Optional[int] = 0
 
-@app.on_event("startup")
-def startup_event():
-    """Start background tasks"""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Start and stop background tasks"""
     try:
         from src.iot_gateway import initialize_dummy_data, start_iot_simulator
         initialize_dummy_data()
         start_iot_simulator(interval=3) # Update every 3 seconds for better real-time feel
     except Exception as e:
-
         print(f"Error initializing dummy data: {e}")
-
+    
     start_background_monitoring(interval=10) # Log system health every 10s
+    yield
+
+app = FastAPI(title="Animal Disease Prediction API (VetNet Powered)", lifespan=lifespan)
+
+# Enable CORS for React Frontend
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Allow all for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
@@ -187,5 +188,7 @@ async def upload_report(file: UploadFile = File(...)):
 if __name__ == "__main__":
     import uvicorn
     # Start server
-    print("Starting API server on port 8002...")
-    uvicorn.run("simple_api:app", host="0.0.0.0", port=8002, reload=True)
+    # Use PORT from environment (Render / Heroku / etc) or default to 8002
+    port = int(os.environ.get("PORT", 8002))
+    print(f"🚀 Starting VetNet API on port {port}...")
+    uvicorn.run("simple_api:app", host="0.0.0.0", port=port, reload=False)
