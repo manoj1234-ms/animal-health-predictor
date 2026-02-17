@@ -37,10 +37,10 @@ try:
     vetnet_model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
     vetnet_model.eval()
     
-    print("✅ VetNet Logic Loaded Successfully")
+    print("SUCCESS: VetNet Logic Loaded Successfully")
     MODELS_LOADED = True
 except Exception as e:
-    print(f"❌ Failed to load VetNet models: {e}")
+    print(f"ERROR: Failed to load VetNet models: {e}")
     MODELS_LOADED = False
 
 def predict_disease_nn(input_dict):
@@ -57,6 +57,22 @@ def predict_disease_nn(input_dict):
         # Ideally we saved feature names. Let's assume the standard order from training script.
         # 'Age', 'WBC', 'RBC', 'Hemoglobin', 'Platelets', 'Glucose', 'ALT', 'AST', 'Urea', 'Creatinine'
         # + Ratios if calculated
+        
+        # Normalize Species Name
+        animal = input_dict.get('Animal', 'Dog')
+        species_map = {
+            "Cow": "Cattle", "Bull": "Cattle", "Calf": "Cattle",
+            "Piglet": "Pig", "Sow": "Pig", "Boar": "Pig",
+            "Lamb": "Sheep", "Ram": "Sheep", "Ewe": "Sheep",
+            "Kid": "Goat", "Billy": "Goat", "Nanny": "Goat",
+            "Rooster": "Chicken", "Hen": "Chicken", "Chick": "Chicken",
+            "Puppy": "Dog", "Kitten": "Cat", "Foal": "Horse", "Stallion": "Horse", "Mare": "Horse"
+        }
+        if animal in species_map:
+            animal = species_map[animal]
+        input_dict['Animal'] = animal # Update dictionary for downstream usage
+
+        # Calculate Feature Engineering Ratios
         
         # Calculate Feature Engineering Ratios
         wbc = float(input_dict.get('WBC', 0))
@@ -130,7 +146,11 @@ def predict_disease_nn(input_dict):
             cat_idx = torch.argmax(probs).item()
             cat_conf = probs[0][cat_idx].item()
             
+            if np.isnan(cat_conf):
+                cat_conf = 0.0
+
         category_pred = category_encoder.inverse_transform([cat_idx])[0]
+        print(f"DEBUG: VetNet Prediction: {category_pred} (Conf: {cat_conf:.3f})")
         
         # 4. XGBoost Prediction (Stage 2)
         # We use the predicted category to select the specialized model
@@ -147,6 +167,31 @@ def predict_disease_nn(input_dict):
             input_df = pd.DataFrame([full_input])
             
             stage2_pipeline = stage2_models[category_pred]
+            
+            # CRITICAL FIX for XGBoost Version Mismatch
+            # The loaded model might strictly look for 'use_label_encoder' which was removed in newer XGBoost
+            try:
+
+                # Access the classifier (last step of pipeline)
+                if hasattr(stage2_pipeline, 'steps'):
+                    classifier = stage2_pipeline.steps[-1][1]
+                    # Dynamically add the missing attribute if needed to prevent crash
+                    if not hasattr(classifier, 'use_label_encoder'):
+                        classifier.use_label_encoder = False
+                    if not hasattr(classifier, 'gpu_id'):
+                        classifier.gpu_id = -1
+                    if not hasattr(classifier, 'n_jobs'):
+                        classifier.n_jobs = 1
+                elif hasattr(stage2_pipeline, 'predict'):
+                     # Fallback if it's just the classifier not a pipeline
+                     if not hasattr(stage2_pipeline, 'use_label_encoder'):
+                        stage2_pipeline.use_label_encoder = False
+                     if not hasattr(stage2_pipeline, 'gpu_id'):
+                        stage2_pipeline.gpu_id = -1
+
+
+            except Exception as e:
+                print(f"⚠️ XGBoost Patch Warning: {e}")
             
             # Note: Stage 2 models were trained on the OLD data structure (without ratios?).
             # If we retrained everything, stage 2 is also fresh.
@@ -174,8 +219,12 @@ def predict_disease_nn(input_dict):
             class_idx = list(stage2_pipeline.classes_).index(disease_pred_idx)
             disease_conf = float(disease_probs[class_idx])
             
-            disease_name = disease_pred # It's actually the integer, mapped back
-            # Wait, `disease_pred` above is `disease_encoder.inverse_transform(...)`. So it is the string name.
+            disease_name = disease_pred 
+            
+            if np.isnan(disease_conf):
+                disease_conf = 0.0
+            
+            print(f"DEBUG: Stage 2 Prediction: {disease_name} (Conf: {disease_conf:.3f})")
             
         else:
             return {"error": "Category model not found"}
@@ -200,6 +249,8 @@ def predict_disease_nn(input_dict):
         }
         
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return {"error": str(e), "success": False}
 
 def prepare_stage2_input(input_dict):

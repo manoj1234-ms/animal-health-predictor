@@ -44,7 +44,7 @@ export const Telemetry: React.FC<TelemetryProps> = ({ preselectedId }) => {
 
     useEffect(() => {
         refreshData();
-        const interval = setInterval(refreshData, 2000);
+        const interval = setInterval(refreshData, 1000); // Higher frequency for live telemetry
         return () => clearInterval(interval);
     }, []);
 
@@ -111,11 +111,15 @@ export const Telemetry: React.FC<TelemetryProps> = ({ preselectedId }) => {
                 <div className="lg:col-span-1 bg-slate-900/40 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-xl h-[600px] flex flex-col">
                     <div className="p-4 border-b border-white/5 bg-slate-900/60 sticky top-0 z-10 flex justify-between items-center">
                         <span className="font-bold text-slate-300 text-sm uppercase tracking-wider">Active Feeds</span>
-                        <div className="flex space-x-2">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                            <span className="text-xs text-emerald-400 font-bold">LIVE</span>
+                        <div className="flex items-center space-x-2">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                            <span className="text-[10px] text-emerald-400 font-black tracking-widest">LIVE UPLINK</span>
                         </div>
                     </div>
+
                     <div className="overflow-y-auto flex-1 p-2 space-y-1 custom-scrollbar">
                         {devices.map(device => (
                             <button

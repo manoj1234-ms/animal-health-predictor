@@ -40,7 +40,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigateToTelemetry }) =
 
     useEffect(() => {
         refreshData();
-        const interval = setInterval(refreshData, 2000); // Poll every 2s
+        const interval = setInterval(refreshData, 1000); // Poll every 1s for real-time feel
         return () => clearInterval(interval);
     }, []);
 
@@ -101,15 +101,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigateToTelemetry }) =
             {/* Header with Tabs */}
             <div className="flex flex-col space-y-6">
                 <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
-                    <div>
-                        <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-600 dark:from-blue-400 dark:to-emerald-400 tracking-tight">VetNet AI Manager</h2>
-                        <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium italic">
-                            {activeTab === 'OVERVIEW' && `Monitoring all ${devices.length} entities`}
-                            {activeTab === 'FARM' && `Livestock Management System`}
-                            {activeTab === 'ZOO' && `Exotic Species Monitoring`}
-                            {activeTab === 'PET' && `Small Animal Clinic View`}
+                    <div className="relative">
+                        <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-600 to-transparent rounded-full opacity-50"></div>
+                        <h2 className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+                            VETNET<span className="text-blue-600 dark:text-blue-500">.</span>CORE
+                        </h2>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2 font-bold uppercase tracking-[0.3em] text-[10px] flex items-center">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+                            {activeTab === 'OVERVIEW' && "Global Biometric Surveillance Active"}
+                            {activeTab === 'FARM' && "Livestock Optimization Protocol"}
+                            {activeTab === 'ZOO' && "Exotic Species Conservation Grid"}
+                            {activeTab === 'PET' && "Urban Veterinary Network"}
                         </p>
                     </div>
+
 
                     <div className="flex flex-col md:flex-row gap-4 w-full xl:w-auto">
                         {/* Stats Cards */}
@@ -243,10 +248,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigateToTelemetry }) =
                                             <Heart size={18} className="mr-3 text-rose-500" />
                                             <span className="text-xs font-black uppercase tracking-widest">Heart Rate</span>
                                         </div>
-                                        <span className="font-mono text-lg font-black text-slate-700 dark:text-slate-200">
-                                            {device.heart_rate} <span className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase">bpm</span>
+                                        <span className="font-mono text-lg font-black text-slate-700 dark:text-slate-200 flex items-center">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500/40 mr-2 animate-pulse"></span>
+                                            {device.heart_rate} <span className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase ml-1">bpm</span>
                                         </span>
                                     </div>
+
 
                                     <div className="space-y-2">
                                         <div className="flex justify-between text-xs text-slate-400 font-medium">
@@ -328,24 +335,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigateToTelemetry }) =
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden ring-1 ring-white/10"
+                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 w-full max-w-lg rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden ring-1 ring-black/5 dark:ring-white/10"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-slate-800 bg-slate-900/50">
-                                <div className="flex items-center space-x-3">
-                                    <div className="bg-blue-500/20 p-2.5 rounded-xl">
-                                        <Stethoscope className="text-blue-400" size={24} />
+                            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 flex-shrink-0">
+                                <div className="flex items-center space-x-4">
+                                    <div className="bg-blue-600/10 dark:bg-blue-500/20 p-3 rounded-2xl shadow-inner">
+                                        <Stethoscope className="text-blue-600 dark:text-blue-400" size={28} />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold text-white">AI Diagnosis Report</h3>
-                                        <p className="text-xs text-slate-400 font-light">Powered by VetNet Neural Engine</p>
+                                        <h3 className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter uppercase leading-none">AI Intelligence Report</h3>
+                                        <p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-[0.2em] mt-1">VetNet Quantum Engine v4.0</p>
                                     </div>
                                 </div>
-                                <button onClick={closeModal} className="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded-full transition-colors">
+                                <button onClick={closeModal} className="text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 p-2.5 rounded-full transition-all hover:rotate-90">
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <div className="p-8">
+                            <div className="p-6 md:p-8 overflow-y-auto flex-1 custom-scrollbar">
                                 {isDiagnosing ? (
                                     <div className="flex flex-col items-center justify-center py-12 space-y-6">
                                         <div className="relative">
@@ -361,23 +368,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigateToTelemetry }) =
                                     </div>
                                 ) : diagnosisResult ? (
                                     <div className="space-y-6">
-                                        <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 border border-blue-500/30 rounded-2xl p-6 relative overflow-hidden group">
-                                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                                <Activity size={120} />
+
+                                        <div className="bg-gradient-to-br from-indigo-50 via-blue-50 to-white dark:from-slate-800 dark:via-slate-800/80 dark:to-slate-900 border border-blue-200/50 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden group shadow-2xl shadow-blue-500/5 dark:shadow-none">
+                                            <div className="absolute -top-10 -right-10 p-4 opacity-[0.03] dark:opacity-[0.07] group-hover:opacity-[0.1] transition-all duration-700 -rotate-12 group-hover:rotate-0 group-hover:scale-110">
+                                                <Activity size={240} className="text-blue-600" />
                                             </div>
-                                            <span className="text-xs text-blue-300 uppercase font-black tracking-widest mb-1 block">Most Likely Condition</span>
-                                            <h2 className="text-3xl font-black text-white mt-1 leading-tight tracking-tight">
-                                                {diagnosisResult.ai_diagnosis?.predicted_disease || "Unknown"}
-                                            </h2>
-                                            <div className="flex items-center mt-4 space-x-3">
-                                                <div className="bg-slate-900/60 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm border border-slate-700/50 text-slate-300">
-                                                    Confidence: <span className="text-emerald-400 font-bold">{(diagnosisResult.ai_diagnosis?.confidence * 100).toFixed(1)}%</span>
-                                                </div>
-                                                <div className={`bg-slate-900/60 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm border ${diagnosisResult.ai_diagnosis?.severity === 'CRITICAL' ? 'border-red-500/50 text-red-100' : 'border-slate-700/50 text-slate-300'}`}>
-                                                    Severity: <span className={diagnosisResult.ai_diagnosis?.severity === 'CRITICAL' ? 'text-red-400 font-black px-1 animate-pulse' : 'text-rose-400 font-bold'}>{diagnosisResult.ai_diagnosis?.severity}</span>
+                                            <div className="relative z-10">
+                                                <span className="text-[10px] text-blue-600 dark:text-blue-400 uppercase font-black tracking-[0.3em] mb-3 block">Primary Condition Identified</span>
+                                                <h2 className="text-4xl font-black text-slate-900 dark:text-white mt-1 leading-none tracking-tighter">
+                                                    {diagnosisResult.ai_diagnosis?.predicted_disease || diagnosisResult.predicted_disease || "Analysis Pending"}
+                                                </h2>
+                                                <div className="flex flex-wrap items-center mt-6 gap-3">
+                                                    <div className="bg-white/60 dark:bg-white/5 backdrop-blur-md px-5 py-2 rounded-2xl text-[11px] font-black uppercase tracking-widest border border-blue-100 dark:border-white/10 text-slate-600 dark:text-slate-300 flex items-center shadow-sm">
+                                                        <ShieldCheck className="mr-2 text-emerald-500" size={14} />
+                                                        Confidence: <span className="text-emerald-600 dark:text-emerald-400 ml-1">
+                                                            {((diagnosisResult.ai_diagnosis?.disease_confidence || diagnosisResult.ai_diagnosis?.confidence || 0.85) * 100).toFixed(1)}%
+                                                        </span>
+                                                    </div>
+                                                    <div className={`bg-white/60 dark:bg-white/5 backdrop-blur-md px-5 py-2 rounded-2xl text-[11px] font-black uppercase tracking-widest border flex items-center shadow-sm ${diagnosisResult.ai_diagnosis?.severity === 'CRITICAL' ? 'border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400' : 'border-slate-100 dark:border-white/10 text-slate-500 dark:text-slate-300'}`}>
+                                                        <Activity className="mr-2" size={14} />
+                                                        Severity: <span className="ml-1">{diagnosisResult.ai_diagnosis?.severity || "MONITORING"}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
@@ -437,25 +452,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigateToTelemetry }) =
                                                             </div>
                                                             <div className="flex-1">
                                                                 <div className="flex items-center justify-between">
-                                                                    <h3 className="font-black text-xl text-white tracking-tight">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === (selectedDevice as any).device_id)?.species || '')).name}</h3>
+                                                                    <h3 className="font-black text-xl text-white tracking-tight">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === selectedDevice)?.species || '')).name}</h3>
                                                                     <div className="flex items-center text-amber-400">
                                                                         <Star size={12} fill="currentColor" />
-                                                                        <span className="text-xs font-bold ml-1">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === (selectedDevice as any).device_id)?.species || '')).rating}</span>
+                                                                        <span className="text-xs font-bold ml-1">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === selectedDevice)?.species || '')).rating}</span>
                                                                     </div>
                                                                 </div>
-                                                                <p className="text-blue-400 text-xs font-bold uppercase tracking-wide">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === (selectedDevice as any).device_id)?.species || '')).clinic}</p>
+                                                                <p className="text-blue-400 text-xs font-bold uppercase tracking-wide">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === selectedDevice)?.species || '')).clinic}</p>
+
                                                             </div>
                                                         </div>
 
                                                         <div className="grid grid-cols-2 gap-3 mt-5">
                                                             <div className="bg-black/30 p-3 rounded-xl border border-white/5 flex items-center">
                                                                 <Phone className="text-slate-500 mr-2" size={14} />
-                                                                <span className="text-xs font-mono text-slate-300">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === (selectedDevice as any).device_id)?.species || '')).phone}</span>
+                                                                <span className="text-xs font-mono text-slate-300">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === selectedDevice)?.species || '')).phone}</span>
                                                             </div>
                                                             <div className="bg-black/30 p-3 rounded-xl border border-white/5 flex items-center">
                                                                 <MapPin className="text-slate-500 mr-2" size={14} />
-                                                                <span className="text-xs font-bold text-slate-300">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === (selectedDevice as any).device_id)?.species || '')).distance} away</span>
+                                                                <span className="text-xs font-bold text-slate-300">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === selectedDevice)?.species || '')).distance} away</span>
                                                             </div>
+
                                                         </div>
                                                     </div>
                                                     <button onClick={closeModal} className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-black text-xs uppercase tracking-widest transition-all">

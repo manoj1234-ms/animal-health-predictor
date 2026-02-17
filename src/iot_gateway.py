@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 import time
+import random
+from datetime import datetime, timedelta
+import threading
 from .biological_rules import analyze_vitals
+
 
 router = APIRouter()
 
@@ -25,10 +29,96 @@ class AlertResponse(BaseModel):
 # In-memory registry for device-to-animal mapping
 # Format: { device_id: { "animal_id": str, "species": str, "name": str, "age": float, "breed": str, "gender": str } }
 device_registry = {
-    # Pre-populate with some demo devices
+    # Zoo Animals
     "TAG_101": {"animal_id": "Lion_Alpha", "species": "Lion", "name": "Simba", "age": 4.5, "breed": "African", "gender": "Male"},
-    "TAG_102": {"animal_id": "Elephant_01", "species": "Elephant", "name": "Hathi", "age": 12.0, "breed": "African", "gender": "Female"}
+    "TAG_102": {"animal_id": "Elephant_01", "species": "Elephant", "name": "Hathi", "age": 12.0, "breed": "African", "gender": "Female"},
+    
+    # Farm Animals - Cattle
+    "TAG_201": {"animal_id": "Cow_Bassie", "species": "Cattle", "name": "Bessie", "age": 3.0, "breed": "Holstein", "gender": "Female"},
+    "TAG_202": {"animal_id": "Cow_Daisy", "species": "Cattle", "name": "Daisy", "age": 2.5, "breed": "Jersey", "gender": "Female"},
+    "TAG_203": {"animal_id": "Bull_Ferdinand", "species": "Cattle", "name": "Ferdinand", "age": 4.0, "breed": "Angus", "gender": "Male"},
+
+    # Horses
+    "TAG_301": {"animal_id": "Horse_Spirit", "species": "Horse", "name": "Spirit", "age": 5.0, "breed": "Mustang", "gender": "Male"},
+    "TAG_302": {"animal_id": "Horse_Rain", "species": "Horse", "name": "Rain", "age": 4.0, "breed": "Paint", "gender": "Female"},
+
+    # Pigs
+    "TAG_401": {"animal_id": "Pig_Wilbur", "species": "Pig", "name": "Wilbur", "age": 1.0, "breed": "Yorkshire", "gender": "Male"},
+    "TAG_402": {"animal_id": "Pig_Babe", "species": "Pig", "name": "Babe", "age": 0.8, "breed": "Berkshire", "gender": "Male"},
+    
+    # Sheep & Goats
+    "TAG_501": {"animal_id": "Sheep_Dolly", "species": "Sheep", "name": "Dolly", "age": 2.0, "breed": "Merino", "gender": "Female"},
+    "TAG_502": {"animal_id": "Goat_Billy", "species": "Goat", "name": "Billy", "age": 3.0, "breed": "Alpine", "gender": "Male"},
+
+    # Poultry
+    "TAG_601": {"animal_id": "Chicken_Little", "species": "Chicken", "name": "Little", "age": 0.5, "breed": "Leghorn", "gender": "Female"},
+    "TAG_602": {"animal_id": "Chicken_Big", "species": "Chicken", "name": "Big Red", "age": 1.0, "breed": "Rhode Island", "gender": "Male"},
+
+    # Pets
+    "TAG_701": {"animal_id": "Dog_Buddy", "species": "Dog", "name": "Buddy", "age": 3.0, "breed": "Golden Retriever", "gender": "Male"},
+    "TAG_702": {"animal_id": "Dog_Max", "species": "Dog", "name": "Max", "age": 5.0, "breed": "German Shepherd", "gender": "Male"},
 }
+
+# Helper to Initialize Dummy Data
+def initialize_dummy_data():
+    """Populates the device_stream_buffer with initial dummy data for all registered devices."""
+    print(f"Adding dummy data for {len(device_registry)} devices...")
+    current_time = time.time()
+    
+    for device_id, info in device_registry.items():
+        # Baseline vitals per species
+        base_temp = 38.0
+        base_hr = 70.0
+        
+        if info['species'] == 'Cattle': base_temp, base_hr = 38.5, 60
+        elif info['species'] == 'Horse': base_temp, base_hr = 37.5, 40
+        elif info['species'] == 'Pig': base_temp, base_hr = 39.0, 75
+        elif info['species'] == 'Sheep': base_temp, base_hr = 39.0, 75
+        elif info['species'] == 'Goat': base_temp, base_hr = 39.0, 80
+        elif info['species'] == 'Chicken': base_temp, base_hr = 41.5, 275
+        elif info['species'] == 'Dog': base_temp, base_hr = 38.5, 90
+        elif info['species'] == 'Lion': base_temp, base_hr = 38.0, 50
+        elif info['species'] == 'Elephant': base_temp, base_hr = 36.5, 30
+
+        # Create 5-10 history points
+        history = []
+        for i in range(10):
+            t_offset = (10 - i) * 60 # 10 minutes history
+            
+            # Randomized fluctuations
+            temp = base_temp + random.uniform(-0.5, 0.5)
+            hr = base_hr + random.uniform(-5, 5)
+            activity = random.uniform(20, 100)
+            battery = 100 - (i * 0.1)
+
+            # Introduce some anomalies (Dummy Critical/Warning states)
+            if device_id == "TAG_203": # Sick Bull (FMD?)
+                temp += 2.0 # Fever
+                hr += 20
+                activity = 5 # Lethargic
+            elif device_id == "TAG_601": # Sick Chicken (Flu?)
+                temp += 1.5
+                hr += 10
+                activity = 10
+            elif device_id == "TAG_402": # Heat stress Pig
+                temp += 1.0
+                hr += 15
+
+            data = TelemetryData(
+                device_id=device_id,
+                animal_id=info['animal_id'],
+                species=info['species'],
+                timestamp=current_time - t_offset,
+                temperature=round(temp, 1),
+                heart_rate=round(hr, 0),
+                activity_level=round(activity, 1),
+                battery_level=round(battery, 1)
+            )
+            history.append(data)
+        
+        device_stream_buffer[device_id] = history
+    
+    print("Dummy data initialization complete.")
 
 # In-memory store for demo purposes (In prod, use Redis/DB)
 # Format: { device_id: [TelemetryData, ...] }
@@ -42,7 +132,6 @@ class DeviceRegistration(BaseModel):
     age: float
     breed: str
     gender: str
-
 @router.post("/register")
 async def register_device(reg: DeviceRegistration):
     """Register a physical device to an animal profile"""
@@ -51,6 +140,69 @@ async def register_device(reg: DeviceRegistration):
     if reg.device_id not in device_stream_buffer:
         device_stream_buffer[reg.device_id] = []
     return {"status": "success", "message": f"Device {reg.device_id} registered to {reg.name}"}
+
+# Background Simulator Logic
+def start_iot_simulator(interval=5):
+    """
+    Starts a background thread that periodically appends new telemetry data 
+    for all registered devices to simulate real-time behavior.
+    """
+    def simulation_loop():
+        print(f"🚀 IoT Simulator started (Interval: {interval}s)")
+        while True:
+            current_time = time.time()
+            for device_id, info in device_registry.items():
+                if device_id not in device_stream_buffer:
+                    device_stream_buffer[device_id] = []
+                
+                # Get last reading as baseline
+                if device_stream_buffer[device_id]:
+                    last = device_stream_buffer[device_id][-1]
+                    base_temp = last.temperature
+                    base_hr = last.heart_rate
+                    base_battery = last.battery_level
+                else:
+                    # Generic defaults if no history
+                    base_temp, base_hr, base_battery = 38.0, 70.0, 100.0
+
+                # Subtle fluctuations
+                temp = base_temp + random.uniform(-0.2, 0.2)
+                hr = base_hr + random.uniform(-2, 2)
+                activity = random.uniform(10, 80)
+                battery = max(0, base_battery - 0.01)
+
+                # Persist anomalies for specific tags as defined in initialize_dummy_data
+                if device_id == "TAG_203": # Sick Bull
+                    temp = max(temp, 40.5) + random.uniform(-0.1, 0.1)
+                    hr = max(hr, 80) + random.uniform(-1, 1)
+                    activity = random.uniform(2, 8)
+                elif device_id == "TAG_601": # Sick Chicken
+                    temp = max(temp, 42.5) + random.uniform(-0.1, 0.1)
+                    hr = max(hr, 285) + random.uniform(-1, 1)
+
+                new_data = TelemetryData(
+                    device_id=device_id,
+                    animal_id=info['animal_id'],
+                    species=info['species'],
+                    timestamp=current_time,
+                    temperature=round(temp, 1),
+                    heart_rate=round(hr, 0),
+                    activity_level=round(activity, 1),
+                    battery_level=round(battery, 1)
+                )
+
+                device_stream_buffer[device_id].append(new_data)
+                
+                # Keep last 50 readings
+                if len(device_stream_buffer[device_id]) > 50:
+                    device_stream_buffer[device_id].pop(0)
+
+            time.sleep(interval)
+
+    thread = threading.Thread(target=simulation_loop, daemon=True)
+    thread.start()
+    return thread
+
 
 @router.post("/telemetry", response_model=AlertResponse)
 async def ingest_telemetry(data: TelemetryData):

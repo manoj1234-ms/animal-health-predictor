@@ -11,17 +11,25 @@ import os
 import time
 import traceback
 from datetime import datetime
+from fastapi import UploadFile, File, Form
+import pypdf
+import re
+import io
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
+# Try to import from src package
 try:
     from src.inference_nn import predict_disease_nn
-except ImportError as e:
-    print(f"⚠️ ML Model Import Error: {e}")
-    print("Running in Lightweight Mode (No Neural Network)")
-    def predict_disease_nn(data):
-        return {"success": False, "error": "ML Model not loaded"}
+except ImportError:
+    # Try direct import if src is in path or we are in src
+    try:
+        from inference_nn import predict_disease_nn
+    except ImportError as e:
+        print(f"ERROR: ML Model Import Error: {e}")
+        print("Running in Lightweight Mode (No Neural Network)")
+        def predict_disease_nn(data):
+            return {"success": False, "error": "ML Model not loaded"}
+
 
 from src.monitoring import SystemMonitor, start_background_monitoring
 
@@ -72,6 +80,14 @@ class PredictionRequest(BaseModel):
 @app.on_event("startup")
 def startup_event():
     """Start background tasks"""
+    try:
+        from src.iot_gateway import initialize_dummy_data, start_iot_simulator
+        initialize_dummy_data()
+        start_iot_simulator(interval=3) # Update every 3 seconds for better real-time feel
+    except Exception as e:
+
+        print(f"Error initializing dummy data: {e}")
+
     start_background_monitoring(interval=10) # Log system health every 10s
 
 @app.get("/")
@@ -112,10 +128,64 @@ def predict(request: PredictionRequest):
         latency_ms = (time.time() - start_time) * 1000
         # Log error
         monitor.log_prediction(request.dict(), {"success": False, "error": str(e)}, latency_ms)
+        monitor.log_prediction(request.dict(), {"success": False, "error": str(e)}, latency_ms)
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/upload-report")
+async def upload_report(file: UploadFile = File(...)):
+    """Upload PDF report and extract medical data"""
+    try:
+        contents = await file.read()
+        pdf_file = io.BytesIO(contents)
+        reader = pypdf.PdfReader(pdf_file)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() + "\n"
+        
+        # Simple extraction logic (can be improved with LLM)
+        data = {
+            "Animal": "Dog",  # Default
+            "Age": 5.0,
+            "Gender": "Male",
+            "WBC": 8.0,
+            "RBC": 6.0,
+            "Hemoglobin": 14.0,
+            "Platelets": 300.0,
+            "Glucose": 100.0,
+            "Symptom_Fever": 0,
+            "Symptom_Lethargy": 0,
+            "Symptom_Vomiting": 0
+        }
+
+        # Regex Extraction
+        if re.search(r"Species:?\s*(\w+)", text, re.IGNORECASE):
+            data["Animal"] = re.search(r"Species:?\s*(\w+)", text, re.IGNORECASE).group(1)
+        if re.search(r"Age:?\s*(\d*\.?\d+)", text, re.IGNORECASE):
+            data["Age"] = float(re.search(r"Age:?\s*(\d*\.?\d+)", text, re.IGNORECASE).group(1))
+        if re.search(r"Gender:?\s*(\w+)", text, re.IGNORECASE):
+            data["Gender"] = re.search(r"Gender:?\s*(\w+)", text, re.IGNORECASE).group(1)
+        
+        # Blood values
+        if re.search(r"WBC:?\s*(\d*\.?\d+)", text, re.IGNORECASE):
+            data["WBC"] = float(re.search(r"WBC:?\s*(\d*\.?\d+)", text, re.IGNORECASE).group(1))
+        
+        # Symptoms check (keywords)
+        if "fever" in text.lower(): data["Symptom_Fever"] = 1
+        if "lethargy" in text.lower(): data["Symptom_Lethargy"] = 1
+        if "vomiting" in text.lower(): data["Symptom_Vomiting"] = 1
+
+        return {
+            "success": True, 
+            "extracted_data": data,
+            "raw_text_preview": text[:500] + "..."
+        }
+
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"PDF Processing Failed: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
     # Start server
     print("Starting API server on port 8002...")
-    uvicorn.run(app, host="0.0.0.0", port=8002)
+    uvicorn.run("simple_api:app", host="0.0.0.0", port=8002, reload=True)

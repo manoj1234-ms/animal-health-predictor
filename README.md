@@ -83,7 +83,8 @@ python src/train_nn.py
 python scripts/retrain_models.py
 
 # 4. Start the backend
-python simple_api.py
+.\run.ps1
+# python simple_api.py
 
 # 5. Start the frontend (in a new terminal)
 cd vetnet-ui

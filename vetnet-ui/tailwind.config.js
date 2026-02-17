@@ -17,5 +17,14 @@ export default {
       }
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      addUtilities({
+        '.scrollbar-thin': {
+          'scrollbar-width': 'thin',
+          'scrollbar-color': '#334155 rgba(15, 23, 42, 0.2)',
+        },
+      })
+    }
+  ],
 }

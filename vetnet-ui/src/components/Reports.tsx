@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { type DeviceSummary, fetchDashboardSummary } from '../api/client';
-import { FileText, Download, Filter, Search, Calendar, ChevronRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { type DeviceSummary, fetchDashboardSummary, uploadReport, predictDisease, type PredictionRequest } from '../api/client';
+import { FileText, Download, Filter, Search, Calendar, ChevronRight, CheckCircle2, AlertCircle, Upload, Microscope, ClipboardList } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettings } from '../context/SettingsContext';
 
@@ -9,6 +9,63 @@ export const Reports: React.FC = () => {
     const [devices, setDevices] = useState<DeviceSummary[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isExporting, setIsExporting] = useState(false);
+
+    // Prediction State
+    const [predictionData, setPredictionData] = useState<PredictionRequest | null>(null);
+    const [predictionResult, setPredictionResult] = useState<any>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [showPredictor, setShowPredictor] = useState(false);
+
+    const loadSampleData = () => {
+        setPredictionData({
+            Animal: "Cattle",
+            Age: 3.5,
+            Gender: "Female",
+            WBC: 12.5,
+            RBC: 5.8,
+            Hemoglobin: 11.2,
+            Platelets: 250,
+            Glucose: 95,
+            Symptom_Fever: 1,
+            Symptom_Lethargy: 1,
+            Symptom_Vomiting: 0,
+        });
+        setShowPredictor(true);
+        setPredictionResult(null);
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setIsProcessing(true);
+            try {
+                const result = await uploadReport(e.target.files[0]);
+                if (result.success) {
+                    setPredictionData(result.extracted_data);
+                    setShowPredictor(true);
+                    setPredictionResult(null);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Failed to extract data from report.");
+            } finally {
+                setIsProcessing(false);
+            }
+        }
+    };
+
+    const handlePredict = async () => {
+        if (!predictionData) return;
+        setIsProcessing(true);
+        try {
+            const result = await predictDisease(predictionData);
+            setPredictionResult(result);
+        } catch (err) {
+            console.error(err);
+            alert("Prediction failed.");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
     useEffect(() => {
         const loadData = async () => {
@@ -63,6 +120,98 @@ export const Reports: React.FC = () => {
                     <span>Generate Master Audit</span>
                 </button>
             </header>
+
+            {/* Report Analysis Section */}
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-2xl mb-10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+
+                <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start">
+                    <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-4">
+                            <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                                <Microscope size={24} className="text-white" />
+                            </div>
+                            <h3 className="text-2xl font-black tracking-tight">AI Diagnostic Assistant</h3>
+                        </div>
+                        <p className="text-blue-100 max-w-xl mb-6 font-medium">
+                            Upload a veterinary PDF report to automatically extract clinical factors and generate a disease prediction using our VetNet Neural Network.
+                        </p>
+
+                        <div className="flex flex-wrap gap-4">
+                            <label className="cursor-pointer group flex items-center space-x-2 bg-white text-blue-600 px-6 py-3 rounded-xl font-bold transition-all hover:bg-blue-50 hover:shadow-lg active:scale-95">
+                                {isProcessing ? (
+                                    <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                    <Upload size={18} />
+                                )}
+                                <span>{isProcessing ? 'Processing Report...' : 'Upload PDF Report'}</span>
+                                <input type="file" accept=".pdf" className="hidden" onChange={handleFileUpload} disabled={isProcessing} />
+                            </label>
+
+                            <button
+                                onClick={loadSampleData}
+                                className="flex items-center space-x-2 bg-blue-800/50 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-bold transition-all border border-white/20 hover:border-white/40"
+                            >
+                                <ClipboardList size={18} />
+                                <span>Load Sample Data</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {showPredictor && predictionData && (
+                        <div className="w-full md:w-1/2 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 animate-in slide-in-from-right-10 fade-in duration-500">
+                            <h4 className="font-bold text-lg mb-4 flex items-center">
+                                <FileText size={18} className="mr-2" />
+                                Extracted Clinical Factors
+                            </h4>
+
+                            <div className="grid grid-cols-2 gap-4 text-sm mb-6">
+                                <div className="bg-black/20 rounded-lg p-3">
+                                    <span className="block text-blue-200 text-xs uppercase tracking-wider font-bold">Subject</span>
+                                    <span className="font-bold text-lg">{predictionData.Animal} <span className="text-sm opacity-70">({predictionData.Gender}, {predictionData.Age}yr)</span></span>
+                                </div>
+                                <div className="bg-black/20 rounded-lg p-3">
+                                    <span className="block text-blue-200 text-xs uppercase tracking-wider font-bold">WBC Count</span>
+                                    <span className={`font-bold text-lg ${(predictionData.WBC || 0) > 10 ? 'text-red-300' : 'text-emerald-300'}`}>{predictionData.WBC}</span>
+                                </div>
+                                <div className="col-span-2 bg-black/20 rounded-lg p-3">
+                                    <span className="block text-blue-200 text-xs uppercase tracking-wider font-bold">Detected Symptoms</span>
+                                    <div className="flex gap-2 mt-1">
+                                        {[
+                                            { k: 'Symptom_Fever', l: 'Fever' },
+                                            { k: 'Symptom_Lethargy', l: 'Lethargy' },
+                                            { k: 'Symptom_Vomiting', l: 'Vomiting' }
+                                        ].map(s => (
+                                            (predictionData as any)[s.k] === 1 ? (
+                                                <span key={s.k} className="px-2 py-0.5 bg-red-500/30 text-red-200 rounded text-xs font-bold border border-red-500/30">{s.l}</span>
+                                            ) : null
+                                        ))}
+                                        {!Object.keys(predictionData).some(k => k.startsWith('Symptom') && (predictionData as any)[k] === 1) && (
+                                            <span className="text-white/50 italic">No major symptoms detected</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {predictionResult ? (
+                                <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-xl p-4 mb-4">
+                                    <span className="block text-emerald-300 text-xs uppercase tracking-wider font-bold mb-1">Prediction Result</span>
+                                    <div className="font-black text-2xl text-white">{predictionResult.predicted_disease || "Unknown"}</div>
+                                    <div className="text-emerald-200 text-sm mt-1">Confidence: {(predictionResult.confidence * 100).toFixed(1)}%</div>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={handlePredict}
+                                    disabled={isProcessing}
+                                    className="w-full bg-white text-blue-900 font-black py-4 rounded-xl hover:bg-blue-50 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                                >
+                                    {isProcessing ? 'Analyzing...' : 'Run VetNet Diagnosis'}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">

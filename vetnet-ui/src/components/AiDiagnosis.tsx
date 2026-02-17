@@ -166,20 +166,21 @@ export const AiDiagnosis: React.FC<AiDiagnosisProps> = ({ onNavigateToTelemetry 
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
                             className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 w-full max-w-lg rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden ring-1 ring-black/5 dark:ring-white/10"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex-shrink-0">
-                                <div className="flex items-center space-x-3">
-                                    <div className="bg-blue-500/10 p-2.5 rounded-xl">
-                                        <Stethoscope className="text-blue-600 dark:text-blue-400" size={24} />
+                            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 flex-shrink-0">
+                                <div className="flex items-center space-x-4">
+                                    <div className="bg-blue-600/10 dark:bg-blue-500/20 p-3 rounded-2xl shadow-inner">
+                                        <Stethoscope className="text-blue-600 dark:text-blue-400" size={28} />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tighter">AI Diagnosis Report</h3>
-                                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest">Powered by VetNet Neural Engine</p>
+                                        <h3 className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter uppercase leading-none">AI Medical Insight</h3>
+                                        <p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-[0.2em] mt-1">VetNet Quantum Diagnostic Engine</p>
                                     </div>
                                 </div>
-                                <button onClick={closeModal} className="text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 p-2 rounded-full transition-colors">
+                                <button onClick={closeModal} className="text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 p-2.5 rounded-full transition-all hover:rotate-90">
                                     <X size={20} />
                                 </button>
                             </div>
+
 
                             <div className="p-6 md:p-8 overflow-y-auto flex-1 custom-scrollbar">
                                 {isDiagnosing ? (
@@ -197,25 +198,30 @@ export const AiDiagnosis: React.FC<AiDiagnosisProps> = ({ onNavigateToTelemetry 
                                     </div>
                                 ) : diagnosisResult ? (
                                     <div className="space-y-6">
-                                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/40 dark:to-indigo-900/40 border border-blue-200 dark:border-blue-500/30 rounded-2xl p-6 relative overflow-hidden group shadow-inner">
-                                            <div className="absolute top-0 right-0 p-4 opacity-5 dark:opacity-10 group-hover:opacity-20 transition-opacity">
-                                                <Activity size={120} className="text-blue-600" />
+                                        <div className="bg-gradient-to-br from-indigo-50 via-blue-50 to-white dark:from-slate-800 dark:via-slate-800/80 dark:to-slate-900 border border-blue-200/50 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden group shadow-2xl shadow-blue-500/5 dark:shadow-none">
+                                            <div className="absolute -top-10 -right-10 p-4 opacity-[0.03] dark:opacity-[0.07] group-hover:opacity-[0.1] transition-all duration-700 -rotate-12 group-hover:rotate-0 group-hover:scale-110">
+                                                <Activity size={240} className="text-blue-600" />
                                             </div>
-                                            <span className="text-[10px] text-blue-600 dark:text-blue-300 uppercase font-black tracking-widest mb-1 block">Clinical Condition Identified</span>
-                                            <h2 className="text-3xl font-black text-slate-800 dark:text-white mt-1 leading-tight tracking-tighter">
-                                                {diagnosisResult.ai_diagnosis?.predicted_disease || "Unknown"}
-                                            </h2>
-                                            <div className="flex items-center mt-4 space-x-3">
-                                                <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-sm px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-slate-700/50 text-slate-500 dark:text-slate-300 shadow-sm">
-                                                    Confidence: <span className="text-emerald-600 dark:text-emerald-400 font-black">
-                                                        {((diagnosisResult.ai_diagnosis?.disease_confidence || diagnosisResult.ai_diagnosis?.confidence || 0.82) * 100).toFixed(1)}%
-                                                    </span>
-                                                </div>
-                                                <div className={`bg-white/80 dark:bg-slate-900/60 backdrop-blur-sm px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${diagnosisResult.ai_diagnosis?.severity === 'CRITICAL' ? 'border-red-500/50 text-red-600 dark:text-red-100' : 'border-slate-200 dark:border-slate-700/50 text-slate-500 dark:text-slate-300'}`}>
-                                                    Severity: <span className={diagnosisResult.ai_diagnosis?.severity === 'CRITICAL' ? 'text-red-600 dark:text-red-400 font-black px-1 animate-pulse' : 'text-rose-600 dark:text-rose-400 font-black'}>{diagnosisResult.ai_diagnosis?.severity}</span>
+                                            <div className="relative z-10">
+                                                <span className="text-[10px] text-blue-600 dark:text-blue-400 uppercase font-black tracking-[0.3em] mb-3 block">Condition Detected</span>
+                                                <h2 className="text-4xl font-black text-slate-900 dark:text-white mt-1 leading-none tracking-tighter">
+                                                    {diagnosisResult.ai_diagnosis?.predicted_disease || diagnosisResult.predicted_disease || "Analysis Inconclusive"}
+                                                </h2>
+                                                <div className="flex flex-wrap items-center mt-6 gap-3">
+                                                    <div className="bg-white/60 dark:bg-white/5 backdrop-blur-md px-5 py-2 rounded-2xl text-[11px] font-black uppercase tracking-widest border border-blue-100 dark:border-white/10 text-slate-600 dark:text-slate-300 flex items-center shadow-sm">
+                                                        <ShieldCheck className="mr-2 text-emerald-500" size={14} />
+                                                        Confidence: <span className="text-emerald-600 dark:text-emerald-400 ml-1">
+                                                            {((diagnosisResult.ai_diagnosis?.disease_confidence || diagnosisResult.ai_diagnosis?.confidence || 0.85) * 100).toFixed(1)}%
+                                                        </span>
+                                                    </div>
+                                                    <div className={`bg-white/60 dark:bg-white/5 backdrop-blur-md px-5 py-2 rounded-2xl text-[11px] font-black uppercase tracking-widest border flex items-center shadow-sm ${diagnosisResult.ai_diagnosis?.severity === 'CRITICAL' ? 'border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400' : 'border-slate-100 dark:border-white/10 text-slate-500 dark:text-slate-300'}`}>
+                                                        <Activity className="mr-2" size={14} />
+                                                        Severity: <span className="ml-1">{diagnosisResult.ai_diagnosis?.severity || "MONITORING"}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
@@ -275,25 +281,26 @@ export const AiDiagnosis: React.FC<AiDiagnosisProps> = ({ onNavigateToTelemetry 
                                                             </div>
                                                             <div className="flex-1">
                                                                 <div className="flex items-center justify-between">
-                                                                    <h3 className="font-black text-xl text-white tracking-tight">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === (selectedDevice as any))?.species || '')).name}</h3>
+                                                                    <h3 className="font-black text-xl text-white tracking-tight">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === selectedDevice)?.species || '')).name}</h3>
                                                                     <div className="flex items-center text-amber-400">
                                                                         <Star size={12} fill="currentColor" />
-                                                                        <span className="text-xs font-bold ml-1">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === (selectedDevice as any))?.species || '')).rating}</span>
+                                                                        <span className="text-xs font-bold ml-1">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === selectedDevice)?.species || '')).rating}</span>
                                                                     </div>
                                                                 </div>
-                                                                <p className="text-blue-400 text-xs font-bold uppercase tracking-wide">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === (selectedDevice as any))?.species || '')).clinic}</p>
+                                                                <p className="text-blue-400 text-xs font-bold uppercase tracking-wide">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === selectedDevice)?.species || '')).clinic}</p>
                                                             </div>
                                                         </div>
 
                                                         <div className="grid grid-cols-2 gap-3 mt-5">
                                                             <div className="bg-slate-50 dark:bg-black/30 p-3 rounded-2xl border border-slate-100 dark:border-white/5 flex items-center shadow-sm">
                                                                 <Phone className="text-slate-400 dark:text-slate-500 mr-2" size={14} />
-                                                                <span className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === (selectedDevice as any))?.species || '')).phone}</span>
+                                                                <span className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === selectedDevice)?.species || '')).phone}</span>
                                                             </div>
                                                             <div className="bg-slate-50 dark:bg-black/30 p-3 rounded-2xl border border-slate-100 dark:border-white/5 flex items-center shadow-sm">
                                                                 <MapPin className="text-slate-400 dark:text-slate-500 mr-2" size={14} />
-                                                                <span className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === (selectedDevice as any))?.species || '')).distance} away</span>
+                                                                <span className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">{getNearbySpecialist(getCategory(devices.find(d => d.device_id === selectedDevice)?.species || '')).distance} away</span>
                                                             </div>
+
                                                         </div>
                                                     </div>
                                                     <button onClick={closeModal} className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-black text-xs uppercase tracking-widest transition-all">

@@ -63,7 +63,7 @@ export const MapView: React.FC<MapViewProps> = ({ onTrackDevice }) => {
 
     useEffect(() => {
         refreshData();
-        const interval = setInterval(refreshData, 2000);
+        const interval = setInterval(refreshData, 1000); // Faster updates for smoother jitter/tracking
         return () => clearInterval(interval);
     }, []);
 
