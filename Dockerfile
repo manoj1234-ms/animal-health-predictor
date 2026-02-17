@@ -17,8 +17,8 @@ RUN pip install --no-cache-dir \
     uvicorn \
     pandas \
     numpy \
-    scikit-learn \
-    xgboost \
+    scikit-learn==1.8.0 \
+    xgboost==1.7.6 \
     joblib \
     psutil \
     pydantic \

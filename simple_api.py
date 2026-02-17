@@ -38,7 +38,6 @@ monitor = SystemMonitor()
 
 # Import and attach IoT Gateway
 from src.iot_gateway import router as iot_router
-app.include_router(iot_router, prefix="/iot", tags=["IoT Telemetry"])
 
 class PredictionRequest(BaseModel):
     Animal: str
@@ -80,6 +79,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="Animal Disease Prediction API (VetNet Powered)", lifespan=lifespan)
+app.include_router(iot_router, prefix="/iot", tags=["IoT Telemetry"])
 
 # Enable CORS for React Frontend
 from fastapi.middleware.cors import CORSMiddleware
