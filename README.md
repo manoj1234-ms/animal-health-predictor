@@ -9,13 +9,15 @@
 
 VetNet AI is a cutting-edge veterinary diagnostic platform that combines **Deep Learning (PyTorch)** with **XGBoost** to provide real-time disease prediction across 24 animal species. The system integrates with IoT smart tags for continuous health monitoring and AI-powered diagnostics, offering a "God Tier" dashboard for veterinary professionals.
 
+**Production URL**: [https://vetnet-pred.vercel.app/](https://vetnet-pred.vercel.app/)
+
 ### Key Features
 - **🧠 Hybrid AI Engine**: VetNet Neural Network (Stage 1) for category detection + XGBoost (Stage 2) for specific disease prediction.
 - **📡 IoT Real-Time Integration**: Seamless telemetry ingestion from smart collars/ear tags (Temperature, Heart Rate, Activity).
 - **🌍 Massive Species Support**: 24 species including Zoo, Farm, and Exotic animals (Dogs, Cats, Cattle, Lions, Elephants, etc.).
 - **🎯 Clinical-Grade Accuracy**: 95.47% category accuracy validated on 15,000+ clinical signatures.
 - **🎨 Premium UI/UX**: Glassmorphism dashboard with species-specific icons, real-time sync indicators, and dark mode.
-- **� Advanced Analytics**: Geospatial mapping of disease outbreaks, temporal trends, and system health monitoring.
+- **📈 Advanced Analytics**: Geospatial mapping of disease outbreaks, temporal trends, and system health monitoring.
 
 ---
 
@@ -61,7 +63,6 @@ cd vetnet-ai
 pip install -r requirements.txt
 
 # Start the Backend (FastAPI)
-# This also starts the IoT Simulator in the background
 python simple_api.py
 
 # Install Frontend dependencies
@@ -72,7 +73,7 @@ npm install
 npm run dev
 ```
 
-### 2. Docker Deployment
+### 2. Docker Deployment (Local)
 ```bash
 # Build and run all services
 docker-compose up --build
@@ -82,38 +83,46 @@ docker-compose up --build
 ```
 
 ### 3. Vercel + Docker Deployment (Production)
+We use a hybrid approach for optimal performance:
+*   **Frontend**: Hosted on **Vercel** (Root: `vetnet-ui`, Framework: `Vite`).
+*   **Backend**: Hosted via **Docker** on Render (Standard 2GB RAM).
 
-Since VetNet AI uses heavy ML models, we use a hybrid approach:
-*   **Frontend**: Deploy to **Vercel** (Root: `vetnet-ui`, Framework: `Vite`).
-*   **Backend**: Deploy via **Docker** to a container host (Render, Railway, or AWS).
-
-#### Steps:
-1.  Push the project to GitHub.
-2.  Deploy the Backend to **Render** (or similar) using the `Dockerfile` in `animal_fresh/`.
-3.  Deploy the Frontend to **Vercel**, adding `VITE_API_URL` (pointing to your Backend) as an environment variable.
+**Steps**:
+1. Deploy Backend to Render using the `Dockerfile` (ensure `PORT` env is set).
+2. Set `VITE_API_URL` as an environment variable in Vercel to point to Render.
 
 ---
 
-## 📦 Deployment & DevOps
+## ⚠️ Challenges & Lessons Learned
 
-### Environment Variables (.env)
-Create a `.env` in the root for production configuration:
-```env
-API_PORT=8002
-API_HOST=0.0.0.0
-ALLOWED_ORIGINS=http://localhost:5173,https://your-domain.com
-SECRET_KEY=your-production-secret
-```
+Developing a production-grade AI platform involved solving several key technical hurdles:
 
-### � CI/CD Setup (GitHub Actions)
-Add the following secrets to your GitHub repository (Settings → Secrets → Actions):
-1. `DOCKER_USERNAME`: Your Docker Hub username.
-2. `DOCKER_PASSWORD`: Your Docker Hub access token.
+### 1. **Dockerized ML Model Inclusion** 🧠
+*   **Challenge**: AI models (`.pth` and `.pkl`) were ignored by Git/Docker due to size, causing production failures.
+*   **Solution**: Updated ignore rules and force-tracked essential weights while ensuring the Docker build context included the `models/` folder.
 
-**The pipeline automatically:**
-- Validates Python code and AI models.
-- Builds the React frontend.
-- Creates and pushes Docker images to Docker Hub.
+### 2. **Dependency & Enviroment Synchronization** 📦
+*   **Challenge**: Render builds failed due to missing `pypdf` and `python-multipart` libraries not present in standard images.
+*   **Solution**: Modernized the `Dockerfile` and migrated FastAPI to use the newer `lifespan` manager, resolving deprecated event warnings.
+
+### 3. **Dynamic Port Binding** 🔌
+*   **Challenge**: Hardcoded ports caused deployment loops on Render.
+*   **Solution**: Integrated dynamic port binding: `port = int(os.environ.get("PORT", 8002))`.
+
+### 4. **Real-Time Data Latency** �
+*   **Challenge**: Initial polling felt "laggy" for emergency monitoring.
+*   **Solution**: Optimized Vite builds and reduced frontend polling intervals to 1s with Framer Motion animations for a "live uplink" sensation.
+
+---
+
+## 🔬 Model Performance
+
+| Model | Accuracy | Feature Set |
+| :--- | :--- | :--- |
+| **VetNet Neural Network** | 95.47% | 25 Clinical Features (Vitals + Bloodwork) |
+| **XGBoost Stage 2** | 94.30% | Disease-specific classification |
+
+**Data Points**: WBC, RBC, Hemoglobin, Platelets, Glucose, ALT, AST, Urea, Creatinine, Fever, Lethargy, Vomiting, Diarrhea, Coughing, Lameness, Skin Lesions.
 
 ---
 
@@ -128,33 +137,6 @@ Add the following secrets to your GitHub repository (Settings → Secrets → Ac
 2. Update WiFi credentials and your Server IP.
 3. Upload to the ESP32 device.
 
-### Ingesting Telemetry (API Sample)
-```bash
-POST /iot/telemetry
-{
-  "device_id": "TAG_001",
-  "animal_id": "Simba",
-  "species": "Lion",
-  "temperature": 39.2,
-  "heart_rate": 62,
-  "activity_level": 45.0
-}
-```
-
----
-
-## � Model Performance
-
-| Model | Accuracy | Feature Set |
-| :--- | :--- | :--- |
-| **VetNet Neural Network** | 95.47% | 25 Clinical Features (Vitals + Bloodwork) |
-| **XGBoost Stage 2** | 94.30% | Disease-specific classification |
-
-### Clinical Data Points Used:
-- **Vitals**: Temp, Heart Rate, Activity Index.
-- **Blood Work**: WBC, RBC, Hemoglobin, Platelets, Glucose, ALT, AST, Urea, Creatinine.
-- **Symptoms**: Fever, Lethargy, Vomiting, Diarrhea, Coughing, Lameness, Skin Lesions.
-
 ---
 
 ## 📁 Project Structure
@@ -162,36 +144,29 @@ POST /iot/telemetry
 ```
 vetnet-ai/
 ├── src/
-│   ├── models/             # PyTorch Neural Network definitions
-│   ├── inference_nn.py      # Core AI prediction engine
-│   ├── train_nn.py          # NN training scripts
-│   ├── iot_gateway.py       # IoT telemetry & device handling
-│   └── monitoring.py        # System health & metric logging
-├── scripts/                # Utility scripts (Simulator, Retraining)
-├── vetnet-ui/               # React + Tailwind Dashboard
-├── hardware/               # ESP32 Firmware (C++)
-├── models/                  # Saved .PTH and .PKL model files
-├── data/                    # Clinical datasets for training
-├── logs/                    # Automated prediction & health logs
-├── simple_api.py            # Main FastAPI Server
-├── Dockerfile               # Container manifest
-└── docker-compose.yml       # Orchestration manifest
+│   ├── models/             # PyTorch definitions
+│   ├── inference_nn.py      # AI prediction engine
+│   ├── iot_gateway.py       # Telemetry handling
+│   └── monitoring.py        # System health logging
+├── vetnet-ui/               # React Dashboard (Vercel)
+├── models/                  # AI Model Weights
+├── data/                    # Training datasets
+├── simple_api.py            # Main API Server
+└── Dockerfile               # Container manifest
 ```
 
 ---
 
-## 🐛 Troubleshooting & Support
+## 🐛 Troubleshooting
 
-- **Port 8002 Conflict**: If the API fails to start, check for processes using `netstat -ano | findstr :8002` and kill them.
-- **Model Load Error**: Ensure you have run the training scripts `python src/train_nn.py` if the `models/` folder is empty.
-- **Dashboard Data Lag**: The dashboard polls every 1s. Ensure the `simple_api.py` is running to see live data.
+- **Model Load Error**: Ensure `models/` directory contains all `.pkl` and `.pth` files.
+- **Port Conflict**: Kill existing processes or update the `PORT` environment variable.
+- **CORS Errors**: Check `ALLOW_ORIGINS` in `simple_api.py` if using a custom domain.
 
 ---
 
-## � License & Acknowledgments
-
+## 📝 License & Acknowledgments
 - **License**: MIT
 - **Built With**: PyTorch, FastAPI, XGBoost, React, Tailwind CSS, Lucide Icons.
 
----
 **Built with ❤️ for veterinary professionals worldwide**
