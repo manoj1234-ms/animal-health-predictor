@@ -22,7 +22,8 @@ RUN pip install --no-cache-dir \
     joblib \
     psutil \
     pydantic \
-    requests
+    requests \
+    pypdf
 
 # Install PyTorch CPU-only version separately
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
