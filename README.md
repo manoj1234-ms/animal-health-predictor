@@ -3,270 +3,184 @@
 ![VetNet AI](https://img.shields.io/badge/AI-Deep%20Learning-blue)
 ![Species](https://img.shields.io/badge/Species-24-green)
 ![Accuracy](https://img.shields.io/badge/Accuracy-95%25-brightgreen)
+![CI/CD](https://github.com/manoj1234-ms/animal-health-predictor/workflows/VetNet%20AI%20CI/CD%20Pipeline/badge.svg)
 
 ## 🚀 Overview
 
-VetNet AI is a cutting-edge veterinary diagnostic platform that combines **Deep Learning (PyTorch)** with **XGBoost** to provide real-time disease prediction across 24 animal species. The system integrates with IoT smart tags for continuous health monitoring and AI-powered diagnostics.
+VetNet AI is a cutting-edge veterinary diagnostic platform that combines **Deep Learning (PyTorch)** with **XGBoost** to provide real-time disease prediction across 24 animal species. The system integrates with IoT smart tags for continuous health monitoring and AI-powered diagnostics, offering a "God Tier" dashboard for veterinary professionals.
 
 ### Key Features
+- **🧠 Hybrid AI Engine**: VetNet Neural Network (Stage 1) for category detection + XGBoost (Stage 2) for specific disease prediction.
+- **📡 IoT Real-Time Integration**: Seamless telemetry ingestion from smart collars/ear tags (Temperature, Heart Rate, Activity).
+- **🌍 Massive Species Support**: 24 species including Zoo, Farm, and Exotic animals (Dogs, Cats, Cattle, Lions, Elephants, etc.).
+- **🎯 Clinical-Grade Accuracy**: 95.47% category accuracy validated on 15,000+ clinical signatures.
+- **🎨 Premium UI/UX**: Glassmorphism dashboard with species-specific icons, real-time sync indicators, and dark mode.
+- **� Advanced Analytics**: Geospatial mapping of disease outbreaks, temporal trends, and system health monitoring.
 
-- **🧠 Hybrid AI Engine**: VetNet Neural Network (Stage 1) + XGBoost (Stage 2)
-- **📡 IoT Integration**: Real-time telemetry from smart collars/ear tags
-- **🌍 Multi-Species Support**: 24 species including Zoo, Farm, and Exotic animals
-- **🎯 95%+ Accuracy**: Validated on 15,000+ clinical signatures
-- **💉 Clinical Precision**: 25 diagnostic features including real-world symptoms
-- **🔄 Optional Data Handling**: Robust imputation for missing sensor data
+---
 
-## 📊 Supported Species
+## 📊 Supported Species (24 Total)
 
-### Zoo Animals
-Lion, Tiger, Elephant
+| Category | Species |
+| :--- | :--- |
+| **Pets & Exotic** | Dog, Cat, Rabbit, Parrot, Lizard, Snake, Turtle, Fish, Guinea Pig, Ferret |
+| **Farm & Livestock** | Cattle, Buffalo, Sheep, Goat, Pig, Horse, Chicken, Turkey, Duck, Llama, Alpaca |
+| **Zoo Animals** | Lion, Tiger, Elephant |
 
-### Farm Animals
-Cattle, Buffalo, Sheep, Goat, Pig, Horse, Chicken, Turkey, Duck, Llama, Alpaca
+---
 
-### Pets & Exotic
-Dog, Cat, Rabbit, Parrot, Lizard, Snake, Turtle, Fish
+## 🏗️ System Architecture
 
-## 🏗️ Architecture
-
-```
-┌─────────────────┐
-│  IoT Devices    │ (ESP32 Smart Tags)
-│  Temperature    │
-│  Heart Rate     │
-│  Activity       │
-└────────┬────────┘
-         │ HTTP POST
-         ▼
-┌─────────────────┐
-│  IoT Gateway    │ (FastAPI)
-│  Telemetry      │
-│  Device Registry│
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  VetNet Brain   │
-│  Stage 1: NN    │ (PyTorch - Category)
-│  Stage 2: XGB   │ (Disease Prediction)
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Dashboard UI   │ (React + Vite)
-│  Live Monitoring│
-│  AI Diagnosis   │
-└─────────────────┘
+```mermaid
+graph TD
+    A[IoT Smart Tags] -->|HTTP POST| B[FastAPI Gateway]
+    B --> C{VetNet Brain}
+    C --> D[Stage 1: Neural Network]
+    D -->|Category| E[Stage 2: XGBoost Models]
+    E -->|Diagnosis| F[Dashboard UI]
+    F -->|Real-Time| G[Live Telemetry Feed]
+    F -->|Diagnosis| H[AI Recommendations]
 ```
 
-## 🛠️ Installation
+---
+
+## 🛠️ Installation & Setup
 
 ### Prerequisites
 - Python 3.10+
 - Node.js 18+
-- Docker (optional)
+- Docker & Docker Compose (for containerized deployment)
 
-### Quick Start
-
+### 1. Local Development Setup
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/YOUR_USERNAME/vetnet-ai.git
 cd vetnet-ai
 
-# 2. Install Python dependencies
+# Install Backend dependencies
 pip install -r requirements.txt
 
-# 3. Generate training data and train models
-python scripts/generate_enhanced_data.py
-python src/train_nn.py
-python scripts/retrain_models.py
+# Start the Backend (FastAPI)
+# This also starts the IoT Simulator in the background
+python simple_api.py
 
-# 4. Start the backend
-.\run.ps1
-# python simple_api.py
-
-# 5. Start the frontend (in a new terminal)
+# Install Frontend dependencies
 cd vetnet-ui
 npm install
+
+# Start the Frontend (Vite)
 npm run dev
 ```
 
-### Docker Deployment
-
+### 2. Docker Deployment
 ```bash
-# Build and run with Docker Compose
+# Build and run all services
 docker-compose up --build
 
-# Access the API at http://localhost:8002
 # Access the UI at http://localhost:5173
+# Access the API at http://localhost:8002
 ```
 
-## 📡 IoT Device Setup
+---
+
+## 📦 Deployment & DevOps
+
+### Environment Variables (.env)
+Create a `.env` in the root for production configuration:
+```env
+API_PORT=8002
+API_HOST=0.0.0.0
+ALLOWED_ORIGINS=http://localhost:5173,https://your-domain.com
+SECRET_KEY=your-production-secret
+```
+
+### � CI/CD Setup (GitHub Actions)
+Add the following secrets to your GitHub repository (Settings → Secrets → Actions):
+1. `DOCKER_USERNAME`: Your Docker Hub username.
+2. `DOCKER_PASSWORD`: Your Docker Hub access token.
+
+**The pipeline automatically:**
+- Validates Python code and AI models.
+- Builds the React frontend.
+- Creates and pushes Docker images to Docker Hub.
+
+---
+
+## 📡 IoT & Hardware Integration
 
 ### Hardware Requirements
-- ESP32-WROOM-32 microcontroller
-- DS18B20 temperature sensor
-- MAX30102 pulse oximeter
-- ADXL345 accelerometer
-- 3.7V Li-Po battery
+- **Microcontroller**: ESP32-WROOM-32
+- **Sensors**: DS18B20 (Temp), MAX30102 (Pulse), ADXL345 (Accelerometer)
 
 ### Firmware Installation
+1. Open `hardware/VetNet_SmartTag_ESP32.ino` in Arduino IDE.
+2. Update WiFi credentials and your Server IP.
+3. Upload to the ESP32 device.
 
-1. Open `hardware/VetNet_SmartTag_ESP32.ino` in Arduino IDE
-2. Install required libraries:
-   - WiFi
-   - HTTPClient
-   - ArduinoJson
-   - OneWire
-   - DallasTemperature
-   - MAX30105
-3. Update WiFi credentials and server IP
-4. Upload to ESP32
-
-### Device Registration
-
-```bash
-# Register a new IoT device
-python scripts/register_iot_device.py TAG_001 Simba Lion 4.5 African Male
-```
-
-## 🧪 API Endpoints
-
-### Health Check
-```bash
-GET /health
-```
-
-### IoT Telemetry
+### Ingesting Telemetry (API Sample)
 ```bash
 POST /iot/telemetry
 {
   "device_id": "TAG_001",
-  "animal_id": "Lion_Alpha",
+  "animal_id": "Simba",
   "species": "Lion",
-  "timestamp": 1707490000,
-  "temperature": 38.5,
-  "heart_rate": 55,
-  "activity_level": 82.0,
-  "battery_level": 95.0
+  "temperature": 39.2,
+  "heart_rate": 62,
+  "activity_level": 45.0
 }
 ```
 
-### AI Diagnosis
-```bash
-POST /iot/diagnose/{device_id}
-```
+---
 
-### Device Registration
-```bash
-POST /iot/register
-{
-  "device_id": "TAG_001",
-  "animal_id": "Lion_Alpha",
-  "species": "Lion",
-  "name": "Simba",
-  "age": 4.5,
-  "breed": "African",
-  "gender": "Male"
-}
-```
+## � Model Performance
 
-## 📈 Model Performance
+| Model | Accuracy | Feature Set |
+| :--- | :--- | :--- |
+| **VetNet Neural Network** | 95.47% | 25 Clinical Features (Vitals + Bloodwork) |
+| **XGBoost Stage 2** | 94.30% | Disease-specific classification |
 
-| Model | Accuracy | Features | Species |
-|-------|----------|----------|---------|
-| VetNet (Stage 1) | 95.47% | 25 | 24 |
-| XGBoost (Stage 2) | 94.3% | 25 | 24 |
+### Clinical Data Points Used:
+- **Vitals**: Temp, Heart Rate, Activity Index.
+- **Blood Work**: WBC, RBC, Hemoglobin, Platelets, Glucose, ALT, AST, Urea, Creatinine.
+- **Symptoms**: Fever, Lethargy, Vomiting, Diarrhea, Coughing, Lameness, Skin Lesions.
 
-### Clinical Features
-- **Vital Signs**: Temperature, Heart Rate, Activity
-- **Blood Work**: WBC, RBC, Hemoglobin, Platelets, Glucose, ALT, AST, Urea, Creatinine
-- **Symptoms**: Fever, Lethargy, Vomiting, Diarrhea, Weight Loss, Skin Lesion, Coughing, Lameness, Nasal Discharge, Eye Discharge, Drooling, Blisters
-
-## 🔬 Disease Categories
-
-- Viral
-- Bacterial
-- Parasitic
-- Metabolic
-- Respiratory
-- Cardiovascular
-- Musculoskeletal
-- Gastrointestinal
+---
 
 ## 📁 Project Structure
 
 ```
 vetnet-ai/
 ├── src/
-│   ├── models/
-│   │   └── neural_network.py      # VetNet PyTorch model
-│   ├── inference_nn.py             # AI prediction engine
-│   ├── train_nn.py                 # Neural network training
-│   ├── iot_gateway.py              # IoT telemetry handler
-│   ├── biological_rules.py         # Vital sign analysis
-│   └── monitoring.py               # System metrics
-├── scripts/
-│   ├── generate_enhanced_data.py   # Dataset generation
-│   ├── retrain_models.py           # XGBoost training
-│   ├── simulate_iot_devices.py     # IoT simulator
-│   └── register_iot_device.py      # Device onboarding
-├── vetnet-ui/                      # React frontend
-├── hardware/
-│   └── VetNet_SmartTag_ESP32.ino   # IoT firmware
-├── models/                         # Trained AI models
-├── data/                           # Training datasets
-├── simple_api.py                   # FastAPI server
-├── Dockerfile
-└── docker-compose.yml
+│   ├── models/             # PyTorch Neural Network definitions
+│   ├── inference_nn.py      # Core AI prediction engine
+│   ├── train_nn.py          # NN training scripts
+│   ├── iot_gateway.py       # IoT telemetry & device handling
+│   └── monitoring.py        # System health & metric logging
+├── scripts/                # Utility scripts (Simulator, Retraining)
+├── vetnet-ui/               # React + Tailwind Dashboard
+├── hardware/               # ESP32 Firmware (C++)
+├── models/                  # Saved .PTH and .PKL model files
+├── data/                    # Clinical datasets for training
+├── logs/                    # Automated prediction & health logs
+├── simple_api.py            # Main FastAPI Server
+├── Dockerfile               # Container manifest
+└── docker-compose.yml       # Orchestration manifest
 ```
-
-## 🎨 UI Features
-
-- **Live Dashboard**: Real-time device monitoring
-- **Species Filtering**: Zoo, Farm, Pet categories
-- **AI Diagnosis**: One-click disease prediction
-- **Premium Design**: Glassmorphism UI with species-specific icons
-- **Responsive Layout**: Mobile and desktop optimized
-
-## 🔐 Security & Privacy
-
-- Device authentication via unique TAG IDs
-- Encrypted telemetry transmission (HTTPS recommended)
-- HIPAA-compliant data handling (when deployed with SSL)
-
-## 🚀 Deployment
-
-### Production Checklist
-- [ ] Enable HTTPS/SSL
-- [ ] Configure firewall rules
-- [ ] Set up database (PostgreSQL/MongoDB)
-- [ ] Enable Redis for caching
-- [ ] Configure monitoring (Prometheus/Grafana)
-- [ ] Set up backup strategy
-
-## 📝 License
-
-MIT License - See LICENSE file for details
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read CONTRIBUTING.md for guidelines.
-
-## 📧 Support
-
-For issues and questions:
-- GitHub Issues: [Create an issue](https://github.com/YOUR_USERNAME/vetnet-ai/issues)
-- Email: support@vetnet-ai.com
-
-## 🙏 Acknowledgments
-
-- PyTorch Team for the deep learning framework
-- XGBoost contributors
-- FastAPI community
-- React and Vite teams
 
 ---
 
+## 🐛 Troubleshooting & Support
+
+- **Port 8002 Conflict**: If the API fails to start, check for processes using `netstat -ano | findstr :8002` and kill them.
+- **Model Load Error**: Ensure you have run the training scripts `python src/train_nn.py` if the `models/` folder is empty.
+- **Dashboard Data Lag**: The dashboard polls every 1s. Ensure the `simple_api.py` is running to see live data.
+
+---
+
+## � License & Acknowledgments
+
+- **License**: MIT
+- **Built With**: PyTorch, FastAPI, XGBoost, React, Tailwind CSS, Lucide Icons.
+
+---
 **Built with ❤️ for veterinary professionals worldwide**
