@@ -81,6 +81,17 @@ docker-compose up --build
 # Access the API at http://localhost:8002
 ```
 
+### 3. Vercel + Docker Deployment (Production)
+
+Since VetNet AI uses heavy ML models, we use a hybrid approach:
+*   **Frontend**: Deploy to **Vercel** (Root: `vetnet-ui`, Framework: `Vite`).
+*   **Backend**: Deploy via **Docker** to a container host (Render, Railway, or AWS).
+
+#### Steps:
+1.  Push the project to GitHub.
+2.  Deploy the Backend to **Render** (or similar) using the `Dockerfile` in `animal_fresh/`.
+3.  Deploy the Frontend to **Vercel**, adding `VITE_API_URL` (pointing to your Backend) as an environment variable.
+
 ---
 
 ## 📦 Deployment & DevOps
