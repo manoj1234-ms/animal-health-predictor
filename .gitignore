@@ -11,6 +11,8 @@ venv/
 data/*.csv
 # models/*.pth
 # models/*.pkl
+models/stage2_models.pkl
+!models/stage2_*.pkl
 logs/*.jsonl
 api_log.txt
 api_error.txt
