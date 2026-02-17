@@ -10,8 +10,8 @@ venv/
 
 # Data & Models (too large for container)
 data/*.csv
-models/*.pth
-models/*.pkl
+# models/*.pth
+# models/*.pkl
 logs/*.jsonl
 api_log.txt
 api_error.txt
