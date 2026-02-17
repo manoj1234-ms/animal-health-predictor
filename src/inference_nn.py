@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import joblib
 import os
+import gc
 from src.models.neural_network import VetNet
 from src.biological_validation import validate_prediction, get_disease_prevalence, create_medical_disclaimer
 
@@ -22,11 +23,28 @@ try:
     species_encoder = joblib.load('models/species_encoder.pkl')
     category_encoder = joblib.load('models/category_encoder.pkl')
     
-    # Load Stage 2 Models (Still XGBoost for now, or could be replaced later)
-    # The plan Priority 1 was to replace Stage 1 with DL. Stage 2 is still good (90%).
-    # We will reuse the existing stage 2 models for disease prediction once category is found.
-    stage2_models = joblib.load('models/stage2_models.pkl')
+    # stage2_models = joblib.load('models/stage2_models.pkl') # REMOVED: Too heavy for RAM
     disease_encoders = joblib.load('models/disease_encoders.pkl')
+    
+    # Internal cache for lazy loading
+    _STAGED_MODEL_CACHE = {}
+
+    def get_stage2_model(category):
+        """Load specific model on demand to save memory"""
+        if category in _STAGED_MODEL_CACHE:
+            return _STAGED_MODEL_CACHE[category]
+        
+        # Clear other models from cache if memory is very tight
+        if len(_STAGED_MODEL_CACHE) > 1:
+            _STAGED_MODEL_CACHE.clear()
+            gc.collect()
+            
+        model_file = f'models/stage2_{category}.pkl'
+        if os.path.exists(model_file):
+            print(f"LAZY LOAD: Loading model for {category}...")
+            _STAGED_MODEL_CACHE[category] = joblib.load(model_file)
+            return _STAGED_MODEL_CACHE[category]
+        return None
     
     # Initialize VetNet
     n_categories = len(category_encoder.classes_)
@@ -154,9 +172,10 @@ def predict_disease_nn(input_dict):
         
         # 4. XGBoost Prediction (Stage 2)
         # We use the predicted category to select the specialized model
-        if category_pred in stage2_models:
+        stage2_pipeline = get_stage2_model(category_pred)
+        
+        if stage2_pipeline:
             # Create a clean DataFrame with ALL expected columns for the pipeline
-            # The pipeline uses categorical and numeric features defined in retrain_models
             full_input = input_dict.copy()
             
             # Ensure all symptoms are in the dict for the DataFrame
@@ -166,7 +185,7 @@ def predict_disease_nn(input_dict):
             
             input_df = pd.DataFrame([full_input])
             
-            stage2_pipeline = stage2_models[category_pred]
+            # stage2_pipeline = stage2_models[category_pred] # OLD: Replaced by lazy load
             
             # CRITICAL FIX for XGBoost Version Mismatch
             # The loaded model might strictly look for 'use_label_encoder' which was removed in newer XGBoost
@@ -236,6 +255,14 @@ def predict_disease_nn(input_dict):
         from src.treatment_db import get_treatment
         treatment_info = get_treatment(disease_name, category_pred)
         
+        # Clear temporary data for next run
+        # Note: input_df might not exist if stage2_pipeline was None
+        try:
+            del input_df
+        except:
+            pass
+        gc.collect()
+
         return {
             'predicted_category': category_pred,
             'predicted_disease': disease_name,

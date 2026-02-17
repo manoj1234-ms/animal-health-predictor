@@ -12,6 +12,8 @@ venv/
 data/*.csv
 # models/*.pth
 # models/*.pkl
+models/stage2_models.pkl  # IGNORE: Over 80MB, replaced by lazy splits
+!models/stage2_*.pkl      # INCLUDE: Small optimized splits
 logs/*.jsonl
 api_log.txt
 api_error.txt
